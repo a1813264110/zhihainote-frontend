@@ -2,12 +2,9 @@
 /* eslint-disable */
 import request from "@/request";
 
-/** 创建标签 POST /tags/add */
-export async function addTagUsingPost(
-  body: API.TagAddRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseString>("/tags/add", {
+/** addTags POST /api/tags/add */
+export async function addTagsUsingPost(body: API.TagsAddRequest, options?: { [key: string]: any }) {
+  return request<API.BaseResponseOflong>("/api/tags/add", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -17,91 +14,60 @@ export async function addTagUsingPost(
   });
 }
 
-/** 删除标签 DELETE /tags/delete */
-export async function deleteTagUsingDelete(
-  params: {
-    tagId: string;
-  },
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseBoolean>("/tags/delete", {
-    method: "DELETE",
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 更新标签 POST /tags/update */
-export async function updateTagUsingPost(
-  body: API.TagUpdateRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseBoolean>("/tags/update", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 根据ID获取标签 GET /tags/get */
-export async function getTagByIdUsingGet(
-  params: {
-    tagId: string;
-  },
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseTags>("/tags/get", {
-    method: "GET",
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 分页获取标签列表 POST /tags/list/page */
-export async function listTagsByPageUsingPost(
-  body: API.TagQueryRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponsePageTags>("/tags/list/page", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 分页获取当前登录用户创建的标签列表 POST /tags/my/list/page */
-export async function listMyTagsByPageUsingPost(
-  body: API.TagQueryRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponsePageTags>("/tags/my/list/page", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** 获取标签云数据 GET /tags/cloud */
+/** getTagCloud GET /api/tags/cloud */
 export async function getTagCloudUsingGet(
-  params?: {
-    limit?: number;
-  },
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getTagCloudUsingGETParams,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseListTags>("/tags/cloud", {
+  return request<API.BaseResponseOfListOfTagsVO>("/api/tags/cloud", {
+    method: "GET",
+    params: {
+      // limit has a default value: 20
+      limit: "20",
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+/** deleteTags POST /api/tags/delete */
+export async function deleteTagsUsingPost(
+  body: API.DeleteRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseOfboolean>("/api/tags/delete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** editTags POST /api/tags/edit */
+export async function editTagsUsingPost(
+  body: API.TagsEditRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseOfboolean>("/api/tags/edit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** getTagsVOById GET /api/tags/get/vo */
+export async function getTagsVoByIdUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getTagsVOByIdUsingGETParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseOfTagsVO>("/api/tags/get/vo", {
     method: "GET",
     params: {
       ...params,
@@ -110,55 +76,53 @@ export async function getTagCloudUsingGet(
   });
 }
 
-/** 获取个人标签云 GET /tags/my/cloud */
-export async function getMyTagCloudUsingGet(
-  params?: {
-    limit?: number;
-  },
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseListTags>("/tags/my/cloud", {
-    method: "GET",
-    params: {
-      ...params,
+/** listTagsByPage POST /api/tags/list/page */
+export async function listTagsByPageUsingPost(body: API._3, options?: { [key: string]: any }) {
+  return request<API.BaseResponseOfPageOfTags>("/api/tags/list/page", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
+    data: body,
     ...(options || {}),
   });
 }
 
-/** 获取热门标签 GET /tags/hot */
-export async function getHotTagsUsingGet(
-  params?: {
-    limit?: number;
-  },
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseListTags>("/tags/hot", {
-    method: "GET",
-    params: {
-      ...params,
+/** listTagsVOByPage POST /api/tags/list/page/vo */
+export async function listTagsVoByPageUsingPost(body: API._3, options?: { [key: string]: any }) {
+  return request<API.BaseResponseOfPageOfTagsVO>("/api/tags/list/page/vo", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
+    data: body,
     ...(options || {}),
   });
 }
 
-/** 根据笔记ID获取标签列表 GET /tags/by/note/{noteId} */
-export async function getTagsByNoteIdUsingGet(
-  params: {
-    noteId: string;
-  },
+/** listMyTagsVOByPage POST /api/tags/my/list/page/vo */
+export async function listMyTagsVoByPageUsingPost(body: API._3, options?: { [key: string]: any }) {
+  return request<API.BaseResponseOfPageOfTagsVO>("/api/tags/my/list/page/vo", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** updateTags POST /api/tags/update */
+export async function updateTagsUsingPost(
+  body: API.TagsUpdateRequest,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseListTags>(`/tags/by/note/${params.noteId}`, {
-    method: "GET",
+  return request<API.BaseResponseOfboolean>("/api/tags/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
     ...(options || {}),
   });
 }
-
-/** 获取用户标签使用统计 GET /tags/stats/user */
-export async function getUserTagStatsUsingGet(options?: { [key: string]: any }) {
-  return request<API.BaseResponseMapStringInteger>("/tags/stats/user", {
-    method: "GET",
-    ...(options || {}),
-  });
-} 
