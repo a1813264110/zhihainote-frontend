@@ -6,6 +6,8 @@ import LoginView from "../views/user/LoginView.vue";
 import RegisterView from "../views/user/RegisterView.vue";
 import ACCESS_ENUM from "@/access/accessEnum";
 import NoAuthPage from "../views/NoAuthPage.vue";
+import TagListView from "../views/tags/TagListView.vue";
+import TagDetailView from "../views/tags/TagDetailView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -23,12 +25,32 @@ export const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: "notes/edit/:id?",
+        path: "notes/edit/:noteId?",
         name: "编辑笔记",
         component: NoteEditView,
         props: true,
         meta: {
           title: "编辑笔记",
+          hideInMenu: true,
+          access: ACCESS_ENUM.USER,
+        },
+      },
+      {
+        path: "tags",
+        name: "标签管理",
+        component: TagListView,
+        meta: {
+          title: "标签管理",
+          access: ACCESS_ENUM.USER,
+        },
+      },
+      {
+        path: "tags/detail/:tagId",
+        name: "标签详情",
+        component: TagDetailView,
+        props: true,
+        meta: {
+          title: "标签详情",
           hideInMenu: true,
           access: ACCESS_ENUM.USER,
         },

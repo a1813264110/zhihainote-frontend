@@ -632,6 +632,7 @@ declare namespace API {
   };
 
   type TagsAddRequest = {
+    color?: string;
     content?: string;
     tags?: string[];
     title?: string;

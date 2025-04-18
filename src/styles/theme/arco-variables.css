@@ -1,0 +1,118 @@
+/**
+ * Arco Design主题变量
+ * 自定义Arco Design组件库的主题
+ * 详见: https://arco.design/vue/docs/theme
+ */
+
+:root {
+  /* 品牌颜色 */
+  --primary-1: 232, 243, 255;  /* 淡蓝色背景 */
+  --primary-2: 208, 231, 255;
+  --primary-3: 160, 207, 255;
+  --primary-4: 114, 177, 255;
+  --primary-5: 64, 139, 255;
+  --primary-6: 22, 93, 255;    /* 默认主色 */
+  --primary-7: 16, 71, 200;
+  --primary-8: 10, 53, 153;
+  --primary-9: 6, 35, 102;
+  --primary-10: 4, 21, 64;
+  
+  /* 成功状态色 */
+  --success-1: 233, 250, 237;
+  --success-2: 212, 242, 219;
+  --success-3: 169, 227, 183;
+  --success-4: 122, 207, 145;
+  --success-5: 74, 178, 106;
+  --success-6: 35, 148, 72;    /* 默认成功色 */
+  --success-7: 24, 118, 58;
+  --success-8: 17, 90, 44;
+  --success-9: 10, 60, 29;
+  --success-10: 6, 38, 18;
+  
+  /* 警告状态色 */
+  --warning-1: 255, 247, 232;
+  --warning-2: 255, 239, 209;
+  --warning-3: 255, 223, 157;
+  --warning-4: 255, 202, 87;
+  --warning-5: 255, 177, 24;
+  --warning-6: 250, 140, 22;   /* 默认警告色 */
+  --warning-7: 200, 107, 17;
+  --warning-8: 153, 80, 13;
+  --warning-9: 102, 53, 8;
+  --warning-10: 64, 33, 5;
+  
+  /* 危险状态色 */
+  --danger-1: 255, 236, 232;
+  --danger-2: 255, 216, 209;
+  --danger-3: 255, 175, 157;
+  --danger-4: 255, 131, 104;
+  --danger-5: 252, 85, 49;
+  --danger-6: 234, 37, 18;     /* 默认危险色 */
+  --danger-7: 186, 26, 12;
+  --danger-8: 142, 19, 8;
+  --danger-9: 95, 12, 5;
+  --danger-10: 59, 7, 3;
+  
+  /* 链接颜色 */
+  --link-1: 232, 243, 255;
+  --link-2: 208, 231, 255;
+  --link-3: 160, 207, 255;
+  --link-4: 114, 177, 255;
+  --link-5: 64, 139, 255;
+  --link-6: 22, 93, 255;       /* 默认链接色 */
+  --link-7: 16, 71, 200;
+  --link-8: 10, 53, 153;
+  --link-9: 6, 35, 102;
+  --link-10: 4, 21, 64;
+  
+  /* 中性色 */
+  --gray-1: 247, 248, 250;
+  --gray-2: 242, 243, 245;
+  --gray-3: 229, 230, 235;
+  --gray-4: 201, 205, 212;
+  --gray-5: 172, 177, 187;
+  --gray-6: 134, 144, 156;
+  --gray-7: 94, 105, 117;
+  --gray-8: 58, 66, 76;
+  --gray-9: 33, 38, 45;
+  --gray-10: 20, 23, 28;
+  
+  /* 其他组件相关变量 */
+  --color-white: 255, 255, 255;
+  --color-black: 0, 0, 0;
+  
+  /* 文本颜色 */
+  --color-text-1: rgb(var(--gray-10));      /* 标题、重点文本 */
+  --color-text-2: rgb(var(--gray-8));       /* 次级文本 */
+  --color-text-3: rgb(var(--gray-6));       /* 次要信息 */
+  --color-text-4: rgb(var(--gray-4));       /* 禁用文本 */
+  
+  /* 背景颜色 */
+  --color-bg-1: rgb(var(--color-white));    /* 主要背景 */
+  --color-bg-2: rgb(var(--gray-1));         /* 次要背景 */
+  --color-bg-3: rgb(var(--gray-2));         /* 聚焦背景 */
+  --color-bg-4: rgb(var(--gray-3));         /* 禁用背景 */
+  --color-bg-5: rgb(var(--gray-9));         /* 反色背景 */
+  
+  /* 边框颜色 */
+  --color-border: rgb(var(--gray-3));
+  --color-border-2: rgb(var(--gray-4));
+  --color-border-3: rgb(var(--gray-5));
+  --color-border-4: rgb(var(--gray-6));
+  
+  /* 阴影 */
+  --color-shadow-1: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --color-shadow-2: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --color-shadow-3: 0 16px 24px rgba(0, 0, 0, 0.16);
+  
+  /* 字体相关 */
+  --font-size-body-1: 12px;
+  --font-size-body-2: 14px;
+  --font-size-body-3: 16px;
+  --font-size-title-1: 20px;
+  --font-size-title-2: 24px;
+  --font-size-title-3: 28px;
+  
+  /* 动画 */
+  --transition-timing-function-standard: cubic-bezier(0.34, 0.69, 0.1, 1);
+} 

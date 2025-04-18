@@ -1,11 +1,15 @@
 <template>
-  <div class="note-item" @click="handleNoteClick">
+  <div class="note-item rounded-md shadow-light p-md hover-lift hover-shadow" @click="handleNoteClick">
     <div class="note-content">
-      <div class="note-title">{{ note.title || '无标题笔记' }}</div>
-      <div class="note-preview" v-if="note.content">{{ contentPreview }}</div>
-      <div class="note-meta">
-        <span class="note-time">{{ formattedTime }}</span>
-        <div class="note-tags" v-if="note.tagList && note.tagList.length">
+      <div class="note-title text-md font-medium text-primary text-ellipsis mb-xs">
+        {{ note.title || '无标题笔记' }}
+      </div>
+      <div class="note-preview text-sm text-secondary mb-sm" v-if="note.content">
+        {{ contentPreview }}
+      </div>
+      <div class="note-meta flex items-center gap-sm flex-wrap">
+        <span class="note-time text-xs text-tertiary">{{ formattedTime }}</span>
+        <div class="note-tags flex flex-wrap gap-xs" v-if="note.tagList && note.tagList.length">
           <a-tag 
             v-for="tag in note.tagList" 
             :key="tag" 
@@ -17,7 +21,7 @@
         </div>
       </div>
     </div>
-    <div class="note-actions" @click.stop>
+    <div class="note-actions ml-md" @click.stop>
       <a-space>
         <a-button
           type="text"
@@ -108,21 +112,13 @@ const handleNoteClick = () => {
 
 <style scoped>
 .note-item {
-  padding: 12px 16px;
-  border-radius: var(--border-radius-medium);
-  background-color: var(--color-bg-2);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 10px;
-}
-
-.note-item:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  background-color: var(--color-bg-1);
+  transition: all var(--transition-normal);
+  margin-bottom: var(--spacing-sm);
+  background-color: var(--bg-secondary);
 }
 
 .note-content {
@@ -130,48 +126,16 @@ const handleNoteClick = () => {
   overflow: hidden;
 }
 
-.note-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--color-text-1);
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .note-preview {
-  font-size: 14px;
-  color: var(--color-text-3);
-  margin-bottom: 8px;
-  overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-}
-
-.note-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.note-time {
-  font-size: 12px;
-  color: var(--color-text-3);
-}
-
-.note-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  overflow: hidden;
 }
 
 .note-actions {
-  margin-left: 16px;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-normal);
 }
 
 .note-item:hover .note-actions {

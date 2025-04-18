@@ -86,31 +86,34 @@
               <template #title>
                 <div class="card-title">{{ note.title }}</div>
               </template>
-              <div class="card-tags" v-if="note.tagList && note.tagList.length">
-                <a-tag 
-                  v-for="tag in note.tagList" 
-                  :key="tag" 
+              <div class="note-card-tags" v-if="note.tagList && note.tagList.length">
+                <a-tag
+                  v-for="tag in note.tagList.slice(0, 3)" 
+                  :key="tag"
                   size="small"
-                  color="arcoblue"
+                  :style="getTagStyle(tag)"
                 >
                   {{ tag }}
                 </a-tag>
+                <a-tag size="small" v-if="note.tagList.length > 3">...</a-tag>
               </div>
               <div class="card-content" v-if="note.content">
                 {{ getContentPreview(note.content) }}
               </div>
-              <template #actions>
-                <a-button-group>
-                  <a-button type="text" size="small" @click.stop="editNote(note)">
-                    <template #icon><icon-edit /></template>
-                  </a-button>
-                  <a-button type="text" size="small" @click.stop="openTagsModal(note)">
-                    <template #icon><icon-tag /></template>
-                  </a-button>
-                  <a-button type="text" size="small" @click.stop="deleteNote(note)">
-                    <template #icon><icon-delete /></template>
-                  </a-button>
-                </a-button-group>
+              <template #extra>
+                <div class="note-card-actions">
+                  <a-button-group>
+                    <a-button type="text" size="small" @click="viewNote(note)">
+                      <template #icon><icon-eye /></template>
+                    </a-button>
+                    <a-button type="text" size="small" @click="editNote(note)">
+                      <template #icon><icon-edit /></template>
+                    </a-button>
+                    <a-button type="text" size="small" status="danger" @click="deleteNote(note)">
+                      <template #icon><icon-delete /></template>
+                    </a-button>
+                  </a-button-group>
+                </div>
               </template>
               <div class="card-footer">
                 <div class="update-time">{{ formatDate(note.updateTime) }}</div>
@@ -186,11 +189,38 @@
       <div v-if="currentNote">
         <p>为 "{{ currentNote.title }}" 添加或移除标签</p>
         <a-space direction="vertical" style="width: 100%">
-          <a-input-tag
-            v-model="editingTags"
-            placeholder="输入标签名称后回车"
-            allow-clear
-          />
+          <div class="tag-input-container">
+            <div class="selected-tags">
+              <a-tag 
+                v-for="tag in editingTags" 
+                :key="tag" 
+                :style="getTagStyle(tag)"
+                closable
+                @close="removeTag(tag)"
+              >
+                {{ tag }}
+              </a-tag>
+            </div>
+            <div class="tag-input">
+              <a-input
+                v-model="tagInput"
+                placeholder="输入标签名称，回车添加"
+                @keyup.enter="handleTagInputConfirm"
+              />
+              <div v-if="suggestedTags.length > 0" class="tag-suggestions">
+                <div 
+                  v-for="suggestion in suggestedTags" 
+                  :key="suggestion.name"
+                  class="tag-suggestion-item"
+                  @click="selectSuggestion(suggestion)"
+                >
+                  <a-tag :style="{ backgroundColor: suggestion.color || '#165DFF' }">
+                    {{ suggestion.name }}
+                  </a-tag>
+                </div>
+              </div>
+            </div>
+          </div>
           <a-button type="primary" @click="saveNoteTags">
             保存
           </a-button>
@@ -214,7 +244,8 @@ import {
   IconSortAscending,
   IconSortDescending,
   IconRefresh,
-  IconFile
+  IconFile,
+  IconEye
 } from '@arco-design/web-vue/es/icon';
 import { Message, Modal } from '@arco-design/web-vue';
 import { useNotesStore } from '@/store/notesStore';
@@ -232,6 +263,9 @@ const displayMode = ref('card');
 const tagsModalVisible = ref(false);
 const currentNote = ref<any>(null);
 const editingTags = ref<string[]>([]);
+const tagInput = ref('');
+const suggestedTags = ref<any[]>([]);
+const tagColorMap = ref<Record<string, string>>({});
 
 // 分页
 const tablePagination = computed(() => {
@@ -287,28 +321,50 @@ const createNewNote = () => {
 
 // 查看笔记
 const viewNote = (note: any) => {
-  console.log("查看笔记:", note);
-  if (!note || !note.id) {
-    Message.error('无效的笔记ID');
+  console.log("查看笔记，完整数据:", note);
+  if (!note) {
+    Message.error('无效的笔记数据');
     return;
   }
-  // 确保ID为字符串
+  
+  if (!note.id) {
+    Message.error('笔记ID不存在');
+    return;
+  }
+  
+  // 确保ID为字符串类型
   const noteId = String(note.id);
-  console.log("跳转到笔记编辑页面，ID:", noteId);
-  router.push(`/notes/edit/${noteId}`);
+  console.log("处理后的笔记ID:", noteId, "类型:", typeof noteId);
+  
+  // 路由跳转前添加延迟，确保之前的操作完成
+  setTimeout(() => {
+    console.log("跳转到笔记详情页，ID:", noteId);
+    router.push(`/notes/edit/${noteId}`);
+  }, 50);
 };
 
 // 编辑笔记
 const editNote = (note: any) => {
-  console.log("编辑笔记:", note);
-  if (!note || !note.id) {
-    Message.error('无效的笔记ID');
+  console.log("编辑笔记，完整数据:", note);
+  if (!note) {
+    Message.error('无效的笔记数据');
     return;
   }
-  // 确保ID为字符串
+  
+  if (!note.id) {
+    Message.error('笔记ID不存在');
+    return;
+  }
+  
+  // 确保ID为字符串类型
   const noteId = String(note.id);
-  console.log("跳转到笔记编辑页面，ID:", noteId);
-  router.push(`/notes/edit/${noteId}`);
+  console.log("处理后的笔记ID:", noteId, "类型:", typeof noteId);
+  
+  // 路由跳转前添加延迟，确保之前的操作完成
+  setTimeout(() => {
+    console.log("跳转到笔记编辑页面，ID:", noteId);
+    router.push(`/notes/edit/${noteId}`);
+  }, 50);
 };
 
 // 删除笔记
@@ -330,10 +386,85 @@ const deleteNote = (note: any) => {
   });
 };
 
+// 获取所有标签用于自动补全
+const fetchAllTags = async () => {
+  try {
+    const allTags = await notesStore.getAllTags();
+    // 建立标签名称到颜色的映射
+    allTags.forEach(tag => {
+      if (tag.name) {
+        tagColorMap.value[tag.name] = tag.color || '#165DFF';
+      }
+    });
+    console.log("标签颜色映射:", tagColorMap.value);
+  } catch (error) {
+    console.error("获取标签失败", error);
+  }
+};
+
+// 处理标签输入变化
+const handleTagInputChange = () => {
+  if (!tagInput.value) {
+    suggestedTags.value = [];
+    return;
+  }
+  
+  // 从store获取所有标签
+  notesStore.getAllTags().then(allTags => {
+    // 过滤出匹配的标签建议
+    suggestedTags.value = allTags.filter(tag => 
+      tag.name && 
+      tag.name.toLowerCase().includes(tagInput.value.toLowerCase()) &&
+      !editingTags.value.includes(tag.name)
+    );
+  });
+};
+
+// 监听标签输入变化
+watch(tagInput, handleTagInputChange);
+
+// 标签输入确认
+const handleTagInputConfirm = () => {
+  const inputValue = tagInput.value.trim();
+  if (inputValue && !editingTags.value.includes(inputValue)) {
+    editingTags.value.push(inputValue);
+  }
+  tagInput.value = '';
+  suggestedTags.value = [];
+};
+
+// 选择建议的标签
+const selectSuggestion = (suggestion: any) => {
+  if (suggestion.name && !editingTags.value.includes(suggestion.name)) {
+    editingTags.value.push(suggestion.name);
+    // 更新颜色映射
+    tagColorMap.value[suggestion.name] = suggestion.color || '#165DFF';
+  }
+  tagInput.value = '';
+  suggestedTags.value = [];
+};
+
+// 移除标签
+const removeTag = (tag: string) => {
+  const index = editingTags.value.indexOf(tag);
+  if (index !== -1) {
+    editingTags.value.splice(index, 1);
+  }
+};
+
+// 获取标签样式
+const getTagStyle = (tagName: string) => {
+  return { 
+    backgroundColor: tagColorMap.value[tagName] || '#165DFF' 
+  };
+};
+
 // 打开标签管理弹窗
-const openTagsModal = (note: any) => {
+const openTagsModal = async (note: any) => {
   currentNote.value = note;
   editingTags.value = [...(note.tagList || [])];
+  // 获取所有标签以支持自动补全
+  await fetchAllTags();
   tagsModalVisible.value = true;
 };
 
@@ -372,7 +503,8 @@ const saveNoteTags = async () => {
     const result = await notesStore.updateNoteTags(
       currentNote.value.id,
       filteredTags,
-      oldTags
+      oldTags,
+      tagColorMap.value // 传递标签颜色映射
     );
 
     if (result) {
@@ -513,12 +645,11 @@ const getContentPreview = (content: string) => {
   text-overflow: ellipsis;
 }
 
-.card-tags {
-  margin-top: 8px;
-  margin-bottom: 8px;
+.note-card-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  margin-bottom: 8px;
 }
 
 .card-content {
@@ -557,5 +688,53 @@ const getContentPreview = (content: string) => {
 
 .note-title:hover {
   color: rgb(var(--primary-6));
+}
+
+.tag-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tag-input {
+  position: relative;
+}
+
+.tag-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--color-bg-2);
+  border: 1px solid var(--color-border-2);
+  border-radius: 4px;
+  z-index: 100;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tag-suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.tag-suggestion-item:hover {
+  background-color: var(--color-fill-2);
+}
+
+.note-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
 }
 </style> 

@@ -1,0 +1,82 @@
+/**
+ * 全局CSS变量定义
+ * 这些变量定义了应用程序的颜色、间距、字体等样式属性
+ */
+
+:root {
+  /* 品牌颜色 */
+  --primary-color: rgb(var(--primary-6));
+  --primary-light: rgba(var(--primary-6), 0.1);
+  --primary-hover: rgb(var(--primary-5));
+  --primary-active: rgb(var(--primary-7));
+  
+  /* 状态颜色 */
+  --success-color: rgb(var(--success-6));
+  --warning-color: rgb(var(--warning-6));
+  --danger-color: rgb(var(--danger-6));
+  
+  /* 文本颜色 */
+  --text-primary: var(--color-text-1);
+  --text-secondary: var(--color-text-2);
+  --text-tertiary: var(--color-text-3);
+  --text-disabled: var(--color-text-4);
+  
+  /* 背景颜色 */
+  --bg-primary: var(--color-bg-1);
+  --bg-secondary: var(--color-bg-2);
+  --bg-tertiary: var(--color-bg-3);
+  
+  /* 边框和阴影 */
+  --border-color: var(--color-border);
+  --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.15);
+  
+  /* 尺寸和间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 32px;
+  
+  /* 边框圆角 */
+  --border-radius-small: 2px;
+  --border-radius-medium: 4px;
+  --border-radius-large: 8px;
+  --border-radius-circle: 50%;
+  
+  /* 字体 */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  
+  /* 字体大小 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  
+  /* 字体粗细 */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  
+  /* 过渡和动画 */
+  --transition-fast: 0.1s;
+  --transition-normal: 0.2s;
+  --transition-slow: 0.3s;
+  
+  /* 布局尺寸 */
+  --header-height: 64px;
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 48px;
+  --content-padding: 20px;
+}
+
+/* 暗色主题（预留） */
+.dark-theme {
+  /* 暗色主题特有的变量将在这里设置 */
+} 

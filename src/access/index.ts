@@ -2,6 +2,7 @@ import router from "@/router";
 import { useLoginUserStore } from "@/store/userStore";
 import checkAccess from "@/access/checkAccess";
 import { LoginUserVO } from "@/store/userStore";
+import ACCESS_ENUM from "@/access/accessEnum";
 
 /**
  * 全局权限校验
@@ -21,18 +22,19 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
   
-  // 如果需要登录
-  if (needAccess === "user") {
-    // 如果没登录，跳转到登录页面
-    if (!loginUser || !loginUser.userRole || loginUser.userRole === "notLogin") {
+  // 使用 checkAccess 进行统一的权限检查
+  if (!checkAccess(loginUser, needAccess)) {
+    // 如果用户未登录，重定向到登录页面
+    if (!loginUser || !loginUser.userRole || loginUser.userRole === ACCESS_ENUM.NOT_LOGIN) {
       next(`/user/login?redirect=${to.fullPath}`);
       return;
     }
-    // 如果已经登陆了，但是权限不足，那么跳转到无权限页面
-    if (!checkAccess(loginUser, needAccess)) {
-      next("/noAuth");
-      return;
-    }
+    
+    // 其他情况（已登录但权限不足），跳转到无权限页面
+    next("/noAuth");
+    return;
   }
+  
+  // 通过权限检查，放行
   next();
 });

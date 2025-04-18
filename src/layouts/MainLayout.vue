@@ -7,13 +7,13 @@
       class="layout-sider"
       :width="240"
     >
-      <div class="logo">
+      <div class="logo flex items-center justify-center p-md">
         <img 
           src="@/assets/logo.png" 
           alt="知海笔记" 
           v-if="false"
         />
-        <span class="logo-text" v-if="!collapsed">知海笔记</span>
+        <span class="logo-text text-lg font-medium" v-if="!collapsed">知海笔记</span>
       </div>
       <a-menu
         :selected-keys="selectedKeys"
@@ -47,9 +47,9 @@
     <a-layout>
       <!-- 顶部栏 -->
       <a-layout-header class="layout-header">
-        <div class="header-left">
+        <div class="header-left flex items-center">
           <a-button
-            class="collapse-btn"
+            class="collapse-btn mr-lg"
             type="text"
             @click="toggleCollapse"
           >
@@ -62,7 +62,7 @@
             </template>
           </a-breadcrumb>
         </div>
-        <div class="header-right">
+        <div class="header-right flex items-center">
           <a-input-search
             :style="{ width: '320px' }"
             placeholder="搜索笔记..."
@@ -71,7 +71,7 @@
           />
           <a-dropdown trigger="click">
             <a-avatar 
-              :style="{ backgroundColor: '#165DFF', marginLeft: '20px', cursor: 'pointer' }"
+              :style="{ backgroundColor: 'var(--primary-color)', marginLeft: 'var(--spacing-xl)', cursor: 'pointer' }"
             >
               {{ userStore.loginUser.userName.substring(0, 1) }}
             </a-avatar>
@@ -232,7 +232,7 @@ onMounted(() => {
   height: 100%;
   width: 100%;
   display: flex;
-  background-color: var(--color-bg-2);
+  background-color: var(--bg-primary);
 }
 
 .layout-sider {
@@ -242,79 +242,40 @@ onMounted(() => {
   top: 0;
   bottom: 0;
   z-index: 100;
-  box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
-}
-
-.logo {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 20px;
-}
-
-.logo img {
-  height: 32px;
-  margin-right: 10px;
+  box-shadow: var(--shadow-light);
 }
 
 .logo-text {
-  color: var(--color-text-1);
-  font-size: 18px;
-  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .layout-menu {
-  height: calc(100vh - 64px);
+  height: calc(100vh - var(--header-height));
   overflow-y: auto;
 }
 
 .layout-header {
-  background-color: var(--color-bg-2);
-  padding: 0 20px;
-  height: 64px;
-  line-height: 64px;
+  background-color: var(--bg-secondary);
+  padding: 0 var(--spacing-xl);
+  height: var(--header-height);
+  line-height: var(--header-height);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px 0 rgba(29, 35, 41, 0.05);
+  box-shadow: var(--shadow-light);
   position: sticky;
   top: 0;
   z-index: 99;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-}
-
-.collapse-btn {
-  margin-right: 20px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
 .layout-content {
-  padding: 20px;
-  margin-left: 240px;
-  transition: margin-left 0.2s;
-  min-height: calc(100vh - 64px);
+  padding: var(--content-padding);
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--transition-normal);
+  min-height: calc(100vh - var(--header-height));
 }
 
 .layout-container:has(.layout-sider.arco-layout-sider-collapsed) .layout-content {
-  margin-left: 48px;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+  margin-left: var(--sidebar-collapsed-width);
 }
 </style> 

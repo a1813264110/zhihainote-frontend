@@ -7,7 +7,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import { onMounted } from "vue";
-import "@arco-design/web-vue/dist/arco.css";
 import { useLoginUserStore } from '@/store/userStore';
 import { useNotesStore } from '@/store/notesStore';
 
@@ -34,26 +33,5 @@ onMounted(() => {
 </script>
 
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-family);
-}
-
-#app {
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-:root {
-  --primary-color: rgb(var(--primary-6));
-  --border-radius-small: 2px;
-  --border-radius-medium: 4px;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
-}
+/* 全局样式已移至src/styles/目录下的相应文件中 */
 </style>

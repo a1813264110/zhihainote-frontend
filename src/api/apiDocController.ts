@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request from "@/request";
+import request  from "@/request";
 
 /** getApiExample GET /api/api/docs/${param0} */
 export async function getApiExampleUsingGet(
