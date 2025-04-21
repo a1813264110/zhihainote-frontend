@@ -9,6 +9,10 @@
     "openapi2ts": "openapi2ts"
   },
   "dependencies": {
+    "@tiptap/pm": "^2.11.7",
+    "@tiptap/starter-kit": "^2.11.7",
+    "@tiptap/vue-3": "^2.11.7",
+    "@wangeditor/editor": "^5.1.23",
     "axios": "^1.8.4",
     "core-js": "^3.8.3",
     "node-fetch": "^2.7.0",

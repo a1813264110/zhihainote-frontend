@@ -34,11 +34,7 @@
         </a-dropdown>
       </div>
       <div class="right-actions">
-        <a-radio-group
-          type="button"
-          v-model="displayMode"
-          size="small"
-        >
+        <a-radio-group type="button" v-model="displayMode" size="small">
           <a-radio value="card">
             <template #radio="{ checked }">
               <icon-apps :style="{ color: checked ? '#165DFF' : '' }" />
@@ -67,28 +63,28 @@
           <template #image>
             <icon-file style="font-size: 64px; color: #c2c7d0" />
           </template>
-          <a-button type="primary" @click="createNewNote">
-            创建第一篇笔记
-          </a-button>
+          <a-button type="primary" @click="createNewNote"> 创建第一篇笔记 </a-button>
         </a-empty>
       </div>
 
       <!-- 卡片视图 -->
       <div class="card-view" v-else-if="displayMode === 'card'">
         <a-row :gutter="[16, 16]">
-          <a-col :xs="24" :sm="12" :md="8" :lg="6" v-for="note in notesStore.notesList" :key="note.id">
-            <a-card 
-              class="note-card" 
-              :bordered="false" 
-              @click="viewNote(note)"
-              :hoverable="true"
-            >
+          <a-col
+            :xs="24"
+            :sm="12"
+            :md="8"
+            :lg="6"
+            v-for="note in notesStore.notesList"
+            :key="note.id"
+          >
+            <a-card class="note-card" :bordered="false" @click="viewNote(note)" :hoverable="true">
               <template #title>
                 <div class="card-title">{{ note.title }}</div>
               </template>
               <div class="note-card-tags" v-if="note.tagList && note.tagList.length">
                 <a-tag
-                  v-for="tag in note.tagList.slice(0, 3)" 
+                  v-for="tag in note.tagList.slice(0, 3)"
                   :key="tag"
                   size="small"
                   :style="getTagStyle(tag)"
@@ -125,8 +121,8 @@
 
       <!-- 列表视图 -->
       <div class="list-view" v-else>
-        <a-table 
-          :data="notesStore.notesList" 
+        <a-table
+          :data="notesStore.notesList"
           :pagination="tablePagination"
           :loading="notesStore.loading"
           @page-change="onPageChange"
@@ -148,12 +144,7 @@
             <a-table-column title="标签" data-index="tagList">
               <template #cell="{ record }">
                 <div class="tags">
-                  <a-tag 
-                    v-for="tag in record.tagList" 
-                    :key="tag" 
-                    size="small"
-                    color="arcoblue"
-                  >
+                  <a-tag v-for="tag in record.tagList" :key="tag" size="small" color="arcoblue">
                     {{ tag }}
                   </a-tag>
                 </div>
@@ -191,9 +182,9 @@
         <a-space direction="vertical" style="width: 100%">
           <div class="tag-input-container">
             <div class="selected-tags">
-              <a-tag 
-                v-for="tag in editingTags" 
-                :key="tag" 
+              <a-tag
+                v-for="tag in editingTags"
+                :key="tag"
                 :style="getTagStyle(tag)"
                 closable
                 @close="removeTag(tag)"
@@ -208,8 +199,8 @@
                 @keyup.enter="handleTagInputConfirm"
               />
               <div v-if="suggestedTags.length > 0" class="tag-suggestions">
-                <div 
-                  v-for="suggestion in suggestedTags" 
+                <div
+                  v-for="suggestion in suggestedTags"
                   :key="suggestion.name"
                   class="tag-suggestion-item"
                   @click="selectSuggestion(suggestion)"
@@ -221,9 +212,7 @@
               </div>
             </div>
           </div>
-          <a-button type="primary" @click="saveNoteTags">
-            保存
-          </a-button>
+          <a-button type="primary" @click="saveNoteTags"> 保存 </a-button>
         </a-space>
       </div>
     </a-modal>
@@ -231,13 +220,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, onActivated } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { 
-  IconPlus, 
-  IconEdit, 
-  IconDelete, 
-  IconFilter, 
+import { ref, computed, onMounted, watch, onActivated } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import {
+  IconPlus,
+  IconEdit,
+  IconDelete,
+  IconFilter,
   IconTag,
   IconApps,
   IconUnorderedList,
@@ -245,11 +234,11 @@ import {
   IconSortDescending,
   IconRefresh,
   IconFile,
-  IconEye
-} from '@arco-design/web-vue/es/icon';
-import { Message, Modal } from '@arco-design/web-vue';
-import { useNotesStore } from '@/store/notesStore';
-import { useLoginUserStore } from '@/store/userStore';
+  IconEye,
+} from "@arco-design/web-vue/es/icon";
+import { Message, Modal } from "@arco-design/web-vue";
+import { useNotesStore } from "@/store/notesStore";
+import { useLoginUserStore } from "@/store/userStore";
 
 const router = useRouter();
 const route = useRoute();
@@ -257,13 +246,13 @@ const notesStore = useNotesStore();
 const userStore = useLoginUserStore();
 
 // 笔记展示模式：卡片或列表
-const displayMode = ref('card');
+const displayMode = ref("card");
 
 // 标签管理
 const tagsModalVisible = ref(false);
 const currentNote = ref<any>(null);
 const editingTags = ref<string[]>([]);
-const tagInput = ref('');
+const tagInput = ref("");
 const suggestedTags = ref<any[]>([]);
 const tagColorMap = ref<Record<string, string>>({});
 
@@ -285,14 +274,14 @@ onMounted(async () => {
   if (searchQuery) {
     notesStore.setSearchText(searchQuery);
   }
-  
+
   // 加载笔记列表
   await notesStore.fetchNotes();
 });
 
 // 当组件被keep-alive缓存后重新激活时触发
 onActivated(async () => {
-  console.log('笔记列表页面被激活，刷新数据');
+  console.log("笔记列表页面被激活，刷新数据");
   // 重新获取笔记列表，确保显示最新数据
   await notesStore.fetchNotes();
 });
@@ -302,7 +291,7 @@ watch(
   () => route.query,
   (newQuery) => {
     const searchQuery = newQuery.search as string;
-    notesStore.setSearchText(searchQuery || '');
+    notesStore.setSearchText(searchQuery || "");
     notesStore.fetchNotes();
   }
 );
@@ -310,32 +299,32 @@ watch(
 // 创建新笔记
 const createNewNote = () => {
   // 检查用户是否登录
-  if (userStore.loginUser.userRole === 'NOT_LOGIN') {
-    router.push('/user/login');
+  if (userStore.loginUser.userRole === "NOT_LOGIN") {
+    router.push("/user/login");
     return;
   }
-  
+
   // 直接跳转到新建笔记页面，让编辑页面处理初始化
-  router.push('/notes/edit');
+  router.push("/notes/edit");
 };
 
 // 查看笔记
 const viewNote = (note: any) => {
   console.log("查看笔记，完整数据:", note);
   if (!note) {
-    Message.error('无效的笔记数据');
+    Message.error("无效的笔记数据");
     return;
   }
-  
+
   if (!note.id) {
-    Message.error('笔记ID不存在');
+    Message.error("笔记ID不存在");
     return;
   }
-  
+
   // 确保ID为字符串类型
   const noteId = String(note.id);
   console.log("处理后的笔记ID:", noteId, "类型:", typeof noteId);
-  
+
   // 路由跳转前添加延迟，确保之前的操作完成
   setTimeout(() => {
     console.log("跳转到笔记详情页，ID:", noteId);
@@ -347,19 +336,19 @@ const viewNote = (note: any) => {
 const editNote = (note: any) => {
   console.log("编辑笔记，完整数据:", note);
   if (!note) {
-    Message.error('无效的笔记数据');
+    Message.error("无效的笔记数据");
     return;
   }
-  
+
   if (!note.id) {
-    Message.error('笔记ID不存在');
+    Message.error("笔记ID不存在");
     return;
   }
-  
+
   // 确保ID为字符串类型
   const noteId = String(note.id);
   console.log("处理后的笔记ID:", noteId, "类型:", typeof noteId);
-  
+
   // 路由跳转前添加延迟，确保之前的操作完成
   setTimeout(() => {
     console.log("跳转到笔记编辑页面，ID:", noteId);
@@ -370,17 +359,17 @@ const editNote = (note: any) => {
 // 删除笔记
 const deleteNote = (note: any) => {
   Modal.confirm({
-    title: '删除笔记',
+    title: "删除笔记",
     content: `确定要删除笔记 "${note.title}" 吗？`,
-    okText: '删除',
-    cancelText: '取消',
+    okText: "删除",
+    cancelText: "取消",
     okButtonProps: {
-      status: 'danger',
+      status: "danger",
     },
     onOk: async () => {
       const result = await notesStore.moveToTrash(note.id!);
       if (result) {
-        Message.success('笔记已移至回收站');
+        Message.success("笔记已移至回收站");
       }
     },
   });
@@ -391,9 +380,9 @@ const fetchAllTags = async () => {
   try {
     const allTags = await notesStore.getAllTags();
     // 建立标签名称到颜色的映射
-    allTags.forEach(tag => {
+    allTags.forEach((tag) => {
       if (tag.name) {
-        tagColorMap.value[tag.name] = tag.color || '#165DFF';
+        tagColorMap.value[tag.name] = tag.color || "#165DFF";
       }
     });
     console.log("标签颜色映射:", tagColorMap.value);
@@ -408,14 +397,15 @@ const handleTagInputChange = () => {
     suggestedTags.value = [];
     return;
   }
-  
+
   // 从store获取所有标签
-  notesStore.getAllTags().then(allTags => {
+  notesStore.getAllTags().then((allTags) => {
     // 过滤出匹配的标签建议
-    suggestedTags.value = allTags.filter(tag => 
-      tag.name && 
-      tag.name.toLowerCase().includes(tagInput.value.toLowerCase()) &&
-      !editingTags.value.includes(tag.name)
+    suggestedTags.value = allTags.filter(
+      (tag) =>
+        tag.name &&
+        tag.name.toLowerCase().includes(tagInput.value.toLowerCase()) &&
+        !editingTags.value.includes(tag.name)
     );
   });
 };
@@ -429,7 +419,7 @@ const handleTagInputConfirm = () => {
   if (inputValue && !editingTags.value.includes(inputValue)) {
     editingTags.value.push(inputValue);
   }
-  tagInput.value = '';
+  tagInput.value = "";
   suggestedTags.value = [];
 };
 
@@ -438,9 +428,9 @@ const selectSuggestion = (suggestion: any) => {
   if (suggestion.name && !editingTags.value.includes(suggestion.name)) {
     editingTags.value.push(suggestion.name);
     // 更新颜色映射
-    tagColorMap.value[suggestion.name] = suggestion.color || '#165DFF';
+    tagColorMap.value[suggestion.name] = suggestion.color || "#165DFF";
   }
-  tagInput.value = '';
+  tagInput.value = "";
   suggestedTags.value = [];
 };
 
@@ -454,8 +444,8 @@ const removeTag = (tag: string) => {
 
 // 获取标签样式
 const getTagStyle = (tagName: string) => {
-  return { 
-    backgroundColor: tagColorMap.value[tagName] || '#165DFF' 
+  return {
+    backgroundColor: tagColorMap.value[tagName] || "#165DFF",
   };
 };
 
@@ -481,21 +471,21 @@ const saveNoteTags = async () => {
 
   try {
     // 过滤掉空标签
-    const filteredTags = editingTags.value.filter(tag => tag && tag.trim() !== '');
-    
+    const filteredTags = editingTags.value.filter((tag) => tag && tag.trim() !== "");
+
     // 如果过滤后与原始数组长度不同，说明有空标签被移除
     if (filteredTags.length !== editingTags.value.length) {
-      console.log('已移除空标签');
+      console.log("已移除空标签");
       editingTags.value = filteredTags;
     }
-    
+
     // 如果没有有效标签，不进行操作
     if (filteredTags.length === 0 && (currentNote.value.tagList || []).length === 0) {
-      Message.info('没有添加任何标签');
+      Message.info("没有添加任何标签");
       closeTagsModal();
       return;
     }
-    
+
     // 获取当前笔记的原有标签
     const oldTags = [...(currentNote.value.tagList || [])];
 
@@ -508,21 +498,21 @@ const saveNoteTags = async () => {
     );
 
     if (result) {
-      Message.success('标签更新成功');
-      
+      Message.success("标签更新成功");
+
       // 更新当前笔记对象的标签列表
       currentNote.value.tagList = [...filteredTags];
-      
+
       // 重新获取笔记列表，确保数据最新
       notesStore.fetchNotes();
-      
+
       closeTagsModal();
     } else {
-      Message.error('标签更新失败');
+      Message.error("标签更新失败");
     }
   } catch (error) {
-    console.error('更新标签失败', error);
-    Message.error('更新标签失败');
+    console.error("更新标签失败", error);
+    Message.error("更新标签失败");
   }
 };
 
@@ -546,15 +536,15 @@ const onPageSizeChange = (pageSize: number) => {
 
 // 格式化日期
 const formatDate = (dateString?: string) => {
-  if (!dateString) return '';
-  
+  if (!dateString) return "";
+
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMinutes = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
-  
+
   if (diffMinutes < 60) {
     return `${diffMinutes} 分钟前`;
   } else if (diffHours < 24) {
@@ -562,7 +552,10 @@ const formatDate = (dateString?: string) => {
   } else if (diffDays < 7) {
     return `${diffDays} 天前`;
   } else {
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date
+      .getDate()
+      .toString()
+      .padStart(2, "0")}`;
   }
 };
 
@@ -570,16 +563,16 @@ const formatDate = (dateString?: string) => {
 const getContentPreview = (content: string) => {
   // 移除Markdown语法，只展示纯文本
   const plainText = content
-    .replace(/#+\s/g, '') // 标题
-    .replace(/\*\*(.*?)\*\*/g, '$1') // 粗体
-    .replace(/\*(.*?)\*/g, '$1') // 斜体
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // 链接
-    .replace(/`(.*?)`/g, '$1') // 代码
-    .replace(/```([\s\S]*?)```/g, '') // 代码块
-    .replace(/!\[(.*?)\]\(.*?\)/g, '[图片]') // 图片
-    .replace(/\n/g, ' '); // 换行替换为空格
-  
-  return plainText.length > 100 ? plainText.substring(0, 100) + '...' : plainText;
+    .replace(/#+\s/g, "") // 标题
+    .replace(/\*\*(.*?)\*\*/g, "$1") // 粗体
+    .replace(/\*(.*?)\*/g, "$1") // 斜体
+    .replace(/\[(.*?)\]\(.*?\)/g, "$1") // 链接
+    .replace(/`(.*?)`/g, "$1") // 代码
+    .replace(/```([\s\S]*?)```/g, "") // 代码块
+    .replace(/!\[(.*?)\]\(.*?\)/g, "[图片]") // 图片
+    .replace(/\n/g, " "); // 换行替换为空格
+
+  return plainText.length > 100 ? plainText.substring(0, 100) + "..." : plainText;
 };
 </script>
 
@@ -737,4 +730,4 @@ const getContentPreview = (content: string) => {
   justify-content: flex-end;
   margin-top: 8px;
 }
-</style> 
+</style>

@@ -2,13 +2,16 @@
   <div class="note-edit-container">
     <!-- 标题栏 -->
     <div class="title-bar">
-      <a-input
-        v-model="title"
-        placeholder="无标题笔记"
-        :style="{ fontSize: '20px', border: 'none', padding: '0' }"
-        :max-length="100"
-        @change="onContentChange"
-      />
+      <div class="title-wrapper">
+        <div class="title-decorator"></div>
+        <a-input
+          v-model="title"
+          placeholder="无标题笔记"
+          :style="{ fontSize: '24px', fontWeight: 'bold', border: 'none', padding: '0', backgroundColor: 'transparent' }"
+          :max-length="100"
+          @change="onContentChange"
+        />
+      </div>
       <div class="actions">
         <a-space>
           <a-button type="text" @click="handleTagsClick">
@@ -29,13 +32,34 @@
 
     <!-- 编辑区域 -->
     <div class="editor-container">
-      <a-textarea
-        v-model="content"
-        placeholder="开始输入笔记内容..."
-        :auto-size="{ minRows: 15, maxRows: 20 }"
-        allow-clear
-        @change="onContentChange"
-      />
+      <!-- Basic Tiptap Toolbar -->
+      <div v-if="editor" class="editor-toolbar">
+        <a-space>
+          <a-button size="mini" :type="editor.isActive('bold') ? 'primary' : 'text'" @click="editor.chain().focus().toggleBold().run()">
+            <template #icon><icon-bold /></template>
+          </a-button>
+          <a-button size="mini" :type="editor.isActive('italic') ? 'primary' : 'text'" @click="editor.chain().focus().toggleItalic().run()">
+            <template #icon><icon-italic /></template>
+          </a-button>
+          <a-button size="mini" :type="editor.isActive('heading', { level: 1 }) ? 'primary' : 'text'" @click="editor.chain().focus().toggleHeading({ level: 1 }).run()">
+            <template #icon><icon-h1 /></template>
+          </a-button>
+           <a-button size="mini" :type="editor.isActive('heading', { level: 2 }) ? 'primary' : 'text'" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">
+            <template #icon><icon-h2 /></template>
+          </a-button>
+           <a-button size="mini" :type="editor.isActive('heading', { level: 3 }) ? 'primary' : 'text'" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">
+            <template #icon><icon-h3 /></template>
+          </a-button>
+          <a-button size="mini" :type="editor.isActive('bulletList') ? 'primary' : 'text'" @click="editor.chain().focus().toggleBulletList().run()">
+            <template #icon><icon-list /></template>
+          </a-button>
+          <a-button size="mini" :type="editor.isActive('orderedList') ? 'primary' : 'text'" @click="editor.chain().focus().toggleOrderedList().run()">
+            <template #icon><icon-list /></template> <!-- Reusing icon for ordered list -->
+          </a-button>
+        </a-space>
+      </div>
+      <!-- Tiptap Editor Content Area -->
+      <editor-content :editor="editor" class="tiptap-editor"/>
     </div>
 
     <!-- 标签管理弹窗 -->
@@ -85,13 +109,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter, RouteLocationNormalized } from "vue-router";
 import { Message, Modal } from "@arco-design/web-vue";
 import { IconTag, IconSave } from "@arco-design/web-vue/es/icon";
 import { useNotesStore } from "@/store/notesStore";
 import { useLoginUserStore } from "@/store/userStore";
 import { addTagToNoteUsingPost } from "@/api/noteTagsController";
+// Tiptap imports
+import { useEditor, EditorContent } from '@tiptap/vue-3';
+import StarterKit from '@tiptap/starter-kit';
+import {
+  IconBold,
+  IconItalic,
+  IconList,
+  IconH1,
+  IconH2,
+  IconH3
+} from "@arco-design/web-vue/es/icon"; // Import icons for toolbar
 
 const route = useRoute();
 const router = useRouter();
@@ -106,6 +141,33 @@ const title = ref("");
 const content = ref("");
 // 标签
 const tags = ref<string[]>([]);
+// Tiptap editor instance
+const editor = useEditor({
+  content: content.value, // Initialize with content
+  extensions: [
+    StarterKit, // Basic rich text features (bold, italic, lists, headings, etc.)
+  ],
+  onUpdate: ({ editor }) => {
+    // Sync editor content back to the ref
+    content.value = editor.getHTML(); 
+    // Trigger change detection
+    onContentChange();
+  },
+});
+
+// Watch for external changes to content (e.g., loading a note)
+watch(content, (newValue) => {
+  // Check if editor exists and if the new value is different from the editor's current content
+  if (editor.value && newValue !== editor.value.getHTML()) {
+    editor.value.commands.setContent(newValue, false); // Update editor content without emitting update event
+  }
+});
+
+// Ensure editor is destroyed when component unmounts
+onBeforeUnmount(() => {
+  editor.value?.destroy();
+});
+
 // 标签输入值
 const tagInput = ref('');
 // 标签建议列表
@@ -680,11 +742,32 @@ const beforeRouteLeave = (
 }
 
 .title-bar {
-  padding: 16px 0;
+  padding: 20px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--color-border-3);
+  background-color: var(--color-bg-1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.title-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  margin-right: 24px;
+  padding-left: 16px;
+}
+
+.title-decorator {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  background: linear-gradient(to bottom, var(--color-primary-light-4), var(--color-primary-6));
+  border-radius: 2px;
 }
 
 .actions {
@@ -694,8 +777,53 @@ const beforeRouteLeave = (
 
 .editor-container {
   flex: 1;
-  padding: 16px 0;
+  padding: 16px;
   overflow: auto;
+  display: flex; /* Make container flex */
+  flex-direction: column; /* Stack toolbar and editor vertically */
+}
+
+/* Style for the Tiptap toolbar */
+.editor-toolbar {
+  padding: 8px;
+  border: 1px solid var(--color-border-2);
+  border-bottom: none; /* Remove bottom border to merge with editor */
+  border-top-left-radius: var(--border-radius-medium);
+  border-top-right-radius: var(--border-radius-medium);
+  background-color: var(--color-fill-2);
+}
+
+/* Style for the Tiptap editor content area */
+.tiptap-editor :deep(.ProseMirror) { /* Use :deep to target ProseMirror internals */
+  height: 100%; /* Make editor fill container height */
+  min-height: 300px; /* Ensure a minimum height */
+  padding: 12px;
+  border: 1px solid var(--color-border-2);
+  border-bottom-left-radius: var(--border-radius-medium);
+  border-bottom-right-radius: var(--border-radius-medium);
+  background-color: var(--color-bg-1);
+  outline: none;
+  overflow-y: auto; /* Allow scrolling within the editor */
+}
+
+/* Add some basic styling for common elements */
+.tiptap-editor :deep(p) {
+  margin-bottom: 0.75em;
+}
+
+.tiptap-editor :deep(h1, h2, h3) {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+.tiptap-editor :deep(ul, ol) {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.tiptap-editor :deep(li > p) {
+  margin-bottom: 0.25em; /* Reduce spacing inside list items */
 }
 
 .tag-input-container {

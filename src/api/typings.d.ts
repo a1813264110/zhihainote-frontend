@@ -634,14 +634,13 @@ declare namespace API {
   type TagsAddRequest = {
     color?: string;
     content?: string;
-    tags?: string[];
     title?: string;
   };
 
   type TagsEditRequest = {
+    color?: string;
     content?: string;
     id?: string;
-    tags?: string[];
     title?: string;
   };
 

@@ -1,25 +1,22 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { 
-  addNotesUsingPost, 
-  deleteNotesUsingPost, 
-  editNotesUsingPost, 
+import {
+  addNotesUsingPost,
+  deleteNotesUsingPost,
+  editNotesUsingPost,
   getNotesVoByIdUsingGet,
-  listMyNotesVoByPageUsingPost, 
+  listMyNotesVoByPageUsingPost,
   moveToTrashUsingPost,
   restoreFromTrashUsingPost,
   permanentDeleteUsingPost,
-  listTrashNotesUsingPost
+  listTrashNotesUsingPost,
 } from "@/api/notesController";
-import { 
-  addTagToNoteUsingPost, 
+import {
+  addTagToNoteUsingPost,
   removeTagFromNoteUsingPost,
-  getTagsByNoteIdUsingGet 
+  getTagsByNoteIdUsingGet,
 } from "@/api/noteTagsController";
-import { 
-  addTagsUsingPost,
-  listMyTagsVoByPageUsingPost
-} from "@/api/tagsController";
+import { addTagsUsingPost, listMyTagsVoByPageUsingPost } from "@/api/tagsController";
 import { Message } from "@arco-design/web-vue";
 
 /**
@@ -48,7 +45,7 @@ export const useNotesStore = defineStore("notes", () => {
   const pagination = ref({
     current: 1,
     pageSize: 10,
-    total: 0
+    total: 0,
   });
   // 搜索关键词
   const searchText = ref("");
@@ -72,9 +69,9 @@ export const useNotesStore = defineStore("notes", () => {
         sortOrder: sortOrder.value,
         searchText: searchText.value,
         directoryPath: selectedDirectory.value,
-        tags: selectedTags.value.length > 0 ? selectedTags.value : undefined
+        tags: selectedTags.value.length > 0 ? selectedTags.value : undefined,
       });
-      
+
       if (res.data.code === 0) {
         notesList.value = res.data.data?.records || [];
         pagination.value.total = res.data.data?.total || 0;
@@ -98,9 +95,9 @@ export const useNotesStore = defineStore("notes", () => {
         pageSize: pagination.value.pageSize,
         sortField: sortField.value,
         sortOrder: sortOrder.value,
-        searchText: searchText.value
+        searchText: searchText.value,
       });
-      
+
       if (res.data.code === 0) {
         trashNotes.value = res.data.data?.records || [];
         pagination.value.total = res.data.data?.total || 0;
@@ -120,47 +117,47 @@ export const useNotesStore = defineStore("notes", () => {
     loading.value = true;
     try {
       console.log("获取笔记详情，原始ID:", noteId, "类型:", typeof noteId);
-      
+
       // 确保id不为空
       if (!noteId) {
         console.error("笔记ID为空");
         return null;
       }
-      
+
       // 确保ID为字符串类型
       const stringId = String(noteId);
       console.log("转换为字符串ID:", stringId);
-      
+
       // 尝试先直接使用字符串ID获取
       try {
         console.log("尝试使用字符串ID获取笔记:", stringId);
         const res = await getNotesVoByIdUsingGet({
-          id: stringId as any
+          id: stringId as any,
         });
-        
+
         console.log("使用字符串ID获取笔记响应:", res.data);
-        
+
         if (res.data.code === 0 && res.data.data) {
           console.log("成功获取笔记数据:", res.data.data);
           return res.data.data;
         }
-        
+
         // 如果字符串ID失败，尝试转换为数字
         const numericId = Number(noteId);
         if (!isNaN(numericId)) {
           console.log("尝试使用数字ID获取笔记:", numericId);
           const numRes = await getNotesVoByIdUsingGet({
-            id: numericId
+            id: numericId,
           });
-          
+
           console.log("使用数字ID获取笔记响应:", numRes.data);
-          
+
           if (numRes.data.code === 0 && numRes.data.data) {
             console.log("成功获取笔记数据:", numRes.data.data);
             return numRes.data.data;
           }
         }
-        
+
         // 如果两种方式都失败，显示详细错误信息
         console.error("获取笔记详情失败，ID:", noteId, "响应:", res.data);
         Message.error("获取笔记详情失败: " + (res.data.message || "未知错误"));
@@ -185,13 +182,13 @@ export const useNotesStore = defineStore("notes", () => {
     try {
       // 确保参数有效
       const payload = {
-        title: title || '新笔记',
-        content: content || '',
-        tags: tags || []
+        title: title || "新笔记",
+        content: content || "",
+        tags: tags || [],
       };
-      
+
       const res = await addNotesUsingPost(payload);
-      
+
       if (res.data.code === 0) {
         // 成功时静默处理，不显示消息
         return res.data.data;
@@ -216,9 +213,9 @@ export const useNotesStore = defineStore("notes", () => {
         id,
         title,
         content,
-        tags
+        tags,
       });
-      
+
       if (res.data.code === 0) {
         Message.success("编辑笔记成功");
         return true;
@@ -240,9 +237,9 @@ export const useNotesStore = defineStore("notes", () => {
     loading.value = true;
     try {
       const res = await moveToTrashUsingPost({
-        id
+        id,
       });
-      
+
       if (res.data.code === 0) {
         Message.success("移动到回收站成功");
         // 从列表中移除
@@ -266,9 +263,9 @@ export const useNotesStore = defineStore("notes", () => {
     loading.value = true;
     try {
       const res = await restoreFromTrashUsingPost({
-        id
+        id,
       });
-      
+
       if (res.data.code === 0) {
         Message.success("从回收站恢复成功");
         // 从回收站列表中移除
@@ -292,9 +289,9 @@ export const useNotesStore = defineStore("notes", () => {
     loading.value = true;
     try {
       const res = await permanentDeleteUsingPost({
-        id
+        id,
       });
-      
+
       if (res.data.code === 0) {
         Message.success("永久删除成功");
         // 从回收站列表中移除
@@ -350,17 +347,17 @@ export const useNotesStore = defineStore("notes", () => {
     pagination.value = {
       current: 1,
       pageSize: 10,
-      total: 0
+      total: 0,
     };
   }
 
   // 更新笔记列表中的单个笔记标签（本地更新，不调用API）
   function updateNoteTagsInList(noteId: string, tags: string[]) {
     if (!noteId) return;
-    
+
     // 查找笔记在列表中的索引
-    const noteIndex = notesList.value.findIndex(note => note.id === noteId);
-    
+    const noteIndex = notesList.value.findIndex((note) => note.id === noteId);
+
     // 如果找到笔记，更新其标签
     if (noteIndex !== -1) {
       console.log(`更新笔记${noteId}的标签:`, tags);
@@ -377,9 +374,9 @@ export const useNotesStore = defineStore("notes", () => {
         current: 1,
         pageSize: 1000, // 设置较大值以获取所有标签
         sortField: "createTime",
-        sortOrder: "descend"
+        sortOrder: "descend",
       });
-      
+
       if (res.data.code === 0) {
         return res.data.data?.records || [];
       } else {
@@ -401,42 +398,42 @@ export const useNotesStore = defineStore("notes", () => {
    * @returns 标签ID或null
    */
   async function getOrCreateTagId(tagName: string, color?: string) {
-    if (!tagName || tagName.trim() === '') {
+    if (!tagName || tagName.trim() === "") {
       Message.warning("标签名称不能为空");
       return null;
     }
-    
+
     try {
       // 首先查找标签是否已存在
       const allTags = await getAllTags();
       // 忽略大小写进行比较
-      const existingTag = allTags.find(tag => 
-        tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
+      const existingTag = allTags.find(
+        (tag) => tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
       );
-      
+
       if (existingTag && existingTag.id) {
         console.log(`标签 "${tagName}" 已存在，ID: ${existingTag.id}`);
         return existingTag.id;
       }
-      
+
       // 标签不存在，创建新标签
       try {
         // 如果没有提供颜色，生成一个随机颜色
         const tagColor = color || generateRandomColor();
-        
+
         // 创建标签请求，根据API定义的TagsAddRequest类型
         const tagRequest: API.TagsAddRequest = {
           title: tagName,
-          tags: [tagName]
+          color: tagColor,
         };
-        
+
         // 添加颜色参数
         // 由于TagsAddRequest类型中没有包含color字段，需要使用类型断言
         (tagRequest as any).color = tagColor;
-        
+
         console.log(`准备创建新标签 "${tagName}"`);
         const res = await addTagsUsingPost(tagRequest);
-        
+
         if (res.data.code === 0 && res.data.data) {
           console.log(`标签 "${tagName}" 创建成功，ID: ${res.data.data}`);
           return res.data.data;
@@ -445,15 +442,15 @@ export const useNotesStore = defineStore("notes", () => {
           // 尝试再次获取所有标签并检查
           console.warn(`创建标签失败，错误: ${res.data.message}，尝试再次检查标签是否存在`);
           const retryTags = await getAllTags();
-          const retryExistingTag = retryTags.find(tag => 
-            tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
+          const retryExistingTag = retryTags.find(
+            (tag) => tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
           );
-          
+
           if (retryExistingTag && retryExistingTag.id) {
             console.log(`重试后发现标签 "${tagName}" 已存在，ID: ${retryExistingTag.id}`);
             return retryExistingTag.id;
           }
-          
+
           Message.error(res.data.message || "创建标签失败");
           return null;
         }
@@ -463,16 +460,16 @@ export const useNotesStore = defineStore("notes", () => {
           console.warn("检测到重复标签错误，尝试获取已存在的标签");
           // 尝试再次获取所有标签
           const retryTags = await getAllTags();
-          const retryExistingTag = retryTags.find(tag => 
-            tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
+          const retryExistingTag = retryTags.find(
+            (tag) => tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
           );
-          
+
           if (retryExistingTag && retryExistingTag.id) {
             console.log(`在错误处理中找到已存在标签 "${tagName}"，ID: ${retryExistingTag.id}`);
             return retryExistingTag.id;
           }
         }
-        
+
         console.error("创建标签失败", error);
         Message.error("创建标签失败，请稍后重试");
         return null;
@@ -483,7 +480,7 @@ export const useNotesStore = defineStore("notes", () => {
       return null;
     }
   }
-  
+
   /**
    * 生成随机颜色（十六进制格式）
    * @returns 颜色十六进制值
@@ -501,9 +498,9 @@ export const useNotesStore = defineStore("notes", () => {
       "#FA8C16", // 深橙色
       "#A0D911", // 淡绿色
       "#1677FF", // 天蓝色
-      "#F759AB"  // 亮粉色
+      "#F759AB", // 亮粉色
     ];
-    
+
     // 随机选择一个颜色
     return colors[Math.floor(Math.random() * colors.length)];
   }
@@ -525,17 +522,17 @@ export const useNotesStore = defineStore("notes", () => {
 
       // 步骤1: 获取或创建标签ID，传递颜色参数
       const tagId = await getOrCreateTagId(tagName, color);
-      
+
       if (!tagId) {
         return false; // getOrCreateTagId已经处理了错误消息
       }
-      
+
       // 步骤2: 将标签绑定到笔记
       const res = await addTagToNoteUsingPost({
         noteId,
-        tagId
+        tagId,
       });
-      
+
       if (res.data.code === 0) {
         return true;
       } else {
@@ -559,21 +556,21 @@ export const useNotesStore = defineStore("notes", () => {
 
       // 获取标签ID（但不创建新标签）
       const allTags = await getAllTags();
-      const existingTag = allTags.find(tag => tag.name === tagName);
-      
+      const existingTag = allTags.find((tag) => tag.name === tagName);
+
       if (!existingTag || !existingTag.id) {
         console.error(`找不到标签 ${tagName} 的ID`);
         return false;
       }
-      
+
       const tagId = existingTag.id;
-      
+
       console.log(`从笔记 ${noteId} 移除标签 ${tagName}(ID: ${tagId})`);
       const res = await removeTagFromNoteUsingPost({
         noteId,
-        tagId
+        tagId,
       });
-      
+
       if (res.data.code === 0) {
         console.log("移除标签成功");
         return true;
@@ -595,9 +592,9 @@ export const useNotesStore = defineStore("notes", () => {
     try {
       console.log(`获取笔记 ${noteId} 的标签`);
       const res = await getTagsByNoteIdUsingGet({
-        noteId
+        noteId,
       });
-      
+
       if (res.data.code === 0) {
         console.log("获取标签成功", res.data.data);
         return res.data.data || [];
@@ -614,37 +611,42 @@ export const useNotesStore = defineStore("notes", () => {
   }
 
   // 更新笔记标签（比较新旧标签，添加/移除差异部分）
-  async function updateNoteTags(noteId: string, newTags: string[], oldTags: string[] = [], tagColorMap: Record<string, string> = {}) {
+  async function updateNoteTags(
+    noteId: string,
+    newTags: string[],
+    oldTags: string[] = [],
+    tagColorMap: Record<string, string> = {}
+  ) {
     if (!noteId) return false;
-    
+
     console.log(`更新笔记 ${noteId} 的标签`, {
       oldTags,
-      newTags
+      newTags,
     });
-    
+
     // 找出需要添加的标签（在newTags中但不在oldTags中）
-    const tagsToAdd = newTags.filter(tag => !oldTags.includes(tag));
-    
+    const tagsToAdd = newTags.filter((tag) => !oldTags.includes(tag));
+
     // 找出需要移除的标签（在oldTags中但不在newTags中）
-    const tagsToRemove = oldTags.filter(tag => !newTags.includes(tag));
-    
+    const tagsToRemove = oldTags.filter((tag) => !newTags.includes(tag));
+
     console.log("标签变更情况", {
       tagsToAdd,
-      tagsToRemove
+      tagsToRemove,
     });
-    
+
     let success = true;
-    
+
     // 添加新标签
     for (const tagName of tagsToAdd) {
       // 从颜色映射中获取标签颜色，如果没有则使用默认颜色
-      const tagColor = tagColorMap[tagName] || '#165DFF';
+      const tagColor = tagColorMap[tagName] || "#165DFF";
       const result = await addTagToNote(noteId, tagName, tagColor);
       if (!result) {
         success = false;
       }
     }
-    
+
     // 移除旧标签
     for (const tagName of tagsToRemove) {
       const result = await removeTagFromNote(noteId, tagName);
@@ -652,12 +654,12 @@ export const useNotesStore = defineStore("notes", () => {
         success = false;
       }
     }
-    
+
     // 更新本地笔记列表中的标签
     if (success) {
       updateNoteTagsInList(noteId, newTags);
     }
-    
+
     return success;
   }
 
@@ -691,6 +693,6 @@ export const useNotesStore = defineStore("notes", () => {
     getTagsByNoteId,
     updateNoteTags,
     getAllTags,
-    getOrCreateTagId
+    getOrCreateTagId,
   };
-}); 
+});
