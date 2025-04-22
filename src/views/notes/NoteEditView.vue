@@ -205,11 +205,30 @@ import { useNotesStore } from "@/store/notesStore";
 import { useLoginUserStore } from "@/store/userStore";
 import { addTagToNoteUsingPost } from "@/api/noteTagsController";
 // Tiptap imports
-import { useEditor, EditorContent } from "@tiptap/vue-3";
+import { useEditor, EditorContent, Editor, VueNodeViewRenderer } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import TextAlign from "@tiptap/extension-text-align";
+
+// === Syntax Highlighting Imports ===
+import { all, createLowlight } from "lowlight";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import Document from "@tiptap/extension-document";
+// Import desired languages
+import css from "highlight.js/lib/languages/css";
+import js from "highlight.js/lib/languages/javascript";
+import ts from "highlight.js/lib/languages/typescript";
+import html from "highlight.js/lib/languages/xml"; // <-- 修改路径 (xml includes html)
+import CodeBlockComponent from "./CodeBlockComponent.vue";
+
+const lowlight = createLowlight(all);
+// Register languages
+lowlight.register("html", html);
+lowlight.register("css", css);
+lowlight.register("js", js);
+lowlight.register("ts", ts);
+// === End Syntax Highlighting Imports ===
 
 const route = useRoute();
 const router = useRouter();
@@ -228,12 +247,22 @@ const tags = ref<string[]>([]);
 const editor = useEditor({
   content: content.value, // Initialize with content
   extensions: [
-    StarterKit,
+    StarterKit.configure({
+      // <-- 配置 StarterKit
+      codeBlock: false, // <-- 禁用默认 CodeBlock
+    }),
     Highlight,
     Typography,
     TextAlign.configure({
       types: ["heading", "paragraph"],
     }),
+    // === Syntax Highlighting Extension ===
+    CodeBlockLowlight.extend({
+      addNodeView() {
+        return VueNodeViewRenderer(CodeBlockComponent);
+      },
+    }).configure({ lowlight }),
+    // === End Syntax Highlighting Extension ===
   ],
   onUpdate: ({ editor }) => {
     // Sync editor content back to the ref

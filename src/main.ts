@@ -8,6 +8,8 @@ import { createPinia } from "pinia";
 import "@arco-design/web-vue/dist/arco.css"; // 首先导入Arco基础样式
 import "./styles/index.css"; // 然后导入我们的自定义样式
 
+import "highlight.js/styles/github.css";
+
 const pinia = createPinia();
 
 createApp(App).use(ArcoVue).use(pinia).use(router).mount("#app");
