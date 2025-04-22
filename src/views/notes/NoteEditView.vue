@@ -78,10 +78,10 @@
           </a-button>
           <a-button
             size="mini"
-            :type="editor.isActive('bulletList') ? 'primary' : 'text'"
-            @click="editor.chain().focus().toggleBulletList().run()"
+            :type="editor.isActive('heading', { level: 4 }) ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
           >
-            <template #icon><icon-list /></template>
+            <template #icon><icon-h4 /></template>
           </a-button>
           <a-button
             size="mini"
@@ -164,6 +164,8 @@ import {
   IconH1,
   IconH2,
   IconH3,
+  IconH4,
+  IconH5,
 } from "@arco-design/web-vue/es/icon";
 import { useNotesStore } from "@/store/notesStore";
 import { useLoginUserStore } from "@/store/userStore";
@@ -171,8 +173,8 @@ import { addTagToNoteUsingPost } from "@/api/noteTagsController";
 // Tiptap imports
 import { useEditor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
-import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
-import { common, createLowlight } from 'lowlight';
+import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
+import { common, createLowlight } from "lowlight";
 
 const route = useRoute();
 const router = useRouter();
@@ -192,11 +194,11 @@ const editor = useEditor({
   content: content.value,
   extensions: [
     StarterKit.configure({
-      codeBlock: false // 禁用 StarterKit 内置的代码块
+      codeBlock: false, // 禁用 StarterKit 内置的代码块
     }),
     CodeBlockLowlight.configure({
       lowlight: createLowlight(common),
-      defaultLanguage: 'plaintext' // 可选：设置默认语言
+      defaultLanguage: "plaintext", // 可选：设置默认语言
     }),
   ],
   onUpdate: ({ editor }) => {
@@ -866,11 +868,13 @@ const beforeRouteLeave = (
   margin-bottom: 0.75em;
 }
 
-.tiptap-editor :deep(h1, h2, h3) {
+.tiptap-editor :deep(h1, h2, h3,h4) {
   margin-top: 1em;
   margin-bottom: 0.5em;
   font-weight: bold;
 }
+
+
 
 .tiptap-editor :deep(ul, ol) {
   padding-left: 1.5em;
@@ -955,7 +959,7 @@ const beforeRouteLeave = (
 .tiptap-editor :deep(.hljs-link),
 .tiptap-editor :deep(.hljs-selector-id),
 .tiptap-editor :deep(.hljs-selector-class) {
-  color: #F98181;
+  color: #f98181;
 }
 
 .tiptap-editor :deep(.hljs-number),
@@ -965,23 +969,23 @@ const beforeRouteLeave = (
 .tiptap-editor :deep(.hljs-literal),
 .tiptap-editor :deep(.hljs-type),
 .tiptap-editor :deep(.hljs-params) {
-  color: #FBBC88;
+  color: #fbbc88;
 }
 
 .tiptap-editor :deep(.hljs-string),
 .tiptap-editor :deep(.hljs-symbol),
 .tiptap-editor :deep(.hljs-bullet) {
-  color: #B9F18D;
+  color: #b9f18d;
 }
 
 .tiptap-editor :deep(.hljs-title),
 .tiptap-editor :deep(.hljs-section) {
-  color: #FAF594;
+  color: #faf594;
 }
 
 .tiptap-editor :deep(.hljs-keyword),
 .tiptap-editor :deep(.hljs-selector-tag) {
-  color: #70CFF8;
+  color: #70cff8;
 }
 
 .tiptap-editor :deep(.hljs-emphasis) {
