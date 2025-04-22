@@ -7,7 +7,13 @@
         <a-input
           v-model="title"
           placeholder="无标题笔记"
-          :style="{ fontSize: '24px', fontWeight: 'bold', border: 'none', padding: '0', backgroundColor: 'transparent' }"
+          :style="{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            border: 'none',
+            padding: '0',
+            backgroundColor: 'transparent',
+          }"
           :max-length="100"
           @change="onContentChange"
         />
@@ -35,31 +41,67 @@
       <!-- Basic Tiptap Toolbar -->
       <div v-if="editor" class="editor-toolbar">
         <a-space>
-          <a-button size="mini" :type="editor.isActive('bold') ? 'primary' : 'text'" @click="editor.chain().focus().toggleBold().run()">
+          <a-button
+            size="mini"
+            :type="editor.isActive('bold') ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleBold().run()"
+          >
             <template #icon><icon-bold /></template>
           </a-button>
-          <a-button size="mini" :type="editor.isActive('italic') ? 'primary' : 'text'" @click="editor.chain().focus().toggleItalic().run()">
+          <a-button
+            size="mini"
+            :type="editor.isActive('italic') ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleItalic().run()"
+          >
             <template #icon><icon-italic /></template>
           </a-button>
-          <a-button size="mini" :type="editor.isActive('heading', { level: 1 }) ? 'primary' : 'text'" @click="editor.chain().focus().toggleHeading({ level: 1 }).run()">
+          <a-button
+            size="mini"
+            :type="editor.isActive('heading', { level: 1 }) ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+          >
             <template #icon><icon-h1 /></template>
           </a-button>
-           <a-button size="mini" :type="editor.isActive('heading', { level: 2 }) ? 'primary' : 'text'" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">
+          <a-button
+            size="mini"
+            :type="editor.isActive('heading', { level: 2 }) ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+          >
             <template #icon><icon-h2 /></template>
           </a-button>
-           <a-button size="mini" :type="editor.isActive('heading', { level: 3 }) ? 'primary' : 'text'" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">
+          <a-button
+            size="mini"
+            :type="editor.isActive('heading', { level: 3 }) ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+          >
             <template #icon><icon-h3 /></template>
           </a-button>
-          <a-button size="mini" :type="editor.isActive('bulletList') ? 'primary' : 'text'" @click="editor.chain().focus().toggleBulletList().run()">
+          <a-button
+            size="mini"
+            :type="editor.isActive('bulletList') ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleBulletList().run()"
+          >
             <template #icon><icon-list /></template>
           </a-button>
-          <a-button size="mini" :type="editor.isActive('orderedList') ? 'primary' : 'text'" @click="editor.chain().focus().toggleOrderedList().run()">
-            <template #icon><icon-list /></template> <!-- Reusing icon for ordered list -->
+          <a-button
+            size="mini"
+            :type="editor.isActive('orderedList') ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleOrderedList().run()"
+          >
+            <template #icon><icon-list /></template>
+            <!-- Reusing icon for ordered list -->
+          </a-button>
+          <a-button
+            size="mini"
+            :type="editor.isActive('codeBlock') ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleCodeBlock().run()"
+          >
+            <template #icon><icon-code-block /></template>
           </a-button>
         </a-space>
       </div>
       <!-- Tiptap Editor Content Area -->
-      <editor-content :editor="editor" class="tiptap-editor"/>
+      <editor-content :editor="editor" class="tiptap-editor" />
     </div>
 
     <!-- 标签管理弹窗 -->
@@ -72,9 +114,9 @@
       <a-space direction="vertical" style="width: 100%">
         <div class="tag-input-container">
           <div class="selected-tags">
-            <a-tag 
-              v-for="tag in tags" 
-              :key="tag" 
+            <a-tag
+              v-for="tag in tags"
+              :key="tag"
               :style="getTagStyle(tag)"
               closable
               @close="removeTag(tag)"
@@ -89,8 +131,8 @@
               @keyup.enter="handleTagInputConfirm"
             />
             <div v-if="suggestedTags.length > 0" class="tag-suggestions">
-              <div 
-                v-for="suggestion in suggestedTags" 
+              <div
+                v-for="suggestion in suggestedTags"
                 :key="suggestion.name"
                 class="tag-suggestion-item"
                 @click="selectSuggestion(suggestion)"
@@ -112,21 +154,25 @@
 import { ref, onMounted, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter, RouteLocationNormalized } from "vue-router";
 import { Message, Modal } from "@arco-design/web-vue";
-import { IconTag, IconSave } from "@arco-design/web-vue/es/icon";
-import { useNotesStore } from "@/store/notesStore";
-import { useLoginUserStore } from "@/store/userStore";
-import { addTagToNoteUsingPost } from "@/api/noteTagsController";
-// Tiptap imports
-import { useEditor, EditorContent } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
 import {
+  IconTag,
+  IconSave,
+  IconCodeBlock,
   IconBold,
   IconItalic,
   IconList,
   IconH1,
   IconH2,
-  IconH3
-} from "@arco-design/web-vue/es/icon"; // Import icons for toolbar
+  IconH3,
+} from "@arco-design/web-vue/es/icon";
+import { useNotesStore } from "@/store/notesStore";
+import { useLoginUserStore } from "@/store/userStore";
+import { addTagToNoteUsingPost } from "@/api/noteTagsController";
+// Tiptap imports
+import { useEditor, EditorContent } from "@tiptap/vue-3";
+import StarterKit from "@tiptap/starter-kit";
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
 
 const route = useRoute();
 const router = useRouter();
@@ -143,14 +189,18 @@ const content = ref("");
 const tags = ref<string[]>([]);
 // Tiptap editor instance
 const editor = useEditor({
-  content: content.value, // Initialize with content
+  content: content.value,
   extensions: [
-    StarterKit, // Basic rich text features (bold, italic, lists, headings, etc.)
+    StarterKit.configure({
+      codeBlock: false // 禁用 StarterKit 内置的代码块
+    }),
+    CodeBlockLowlight.configure({
+      lowlight: createLowlight(common),
+      defaultLanguage: 'plaintext' // 可选：设置默认语言
+    }),
   ],
   onUpdate: ({ editor }) => {
-    // Sync editor content back to the ref
-    content.value = editor.getHTML(); 
-    // Trigger change detection
+    content.value = editor.getHTML();
     onContentChange();
   },
 });
@@ -169,7 +219,7 @@ onBeforeUnmount(() => {
 });
 
 // 标签输入值
-const tagInput = ref('');
+const tagInput = ref("");
 // 标签建议列表
 const suggestedTags = ref<any[]>([]);
 // 标签颜色映射
@@ -221,35 +271,35 @@ const loadNoteData = async (noteId: string) => {
     console.log("准备获取笔记，ID:", noteId);
     const note = await notesStore.fetchNoteById(noteId);
     console.log("获取到笔记数据:", note);
-    
+
     if (note) {
       title.value = note.title || "";
       content.value = note.content || "";
-      
+
       // 获取笔记关联的所有标签
       const noteTags = await notesStore.getTagsByNoteId(noteId);
       console.log("获取到笔记关联的标签:", noteTags);
-      
+
       // 如果能获取到标签信息，优先使用专门API返回的标签
       if (noteTags && noteTags.length > 0) {
         // 处理标签信息，提取标签名称
-        tags.value = noteTags.map(tag => tag.name || "").filter(name => name);
+        tags.value = noteTags.map((tag) => tag.name || "").filter((name) => name);
       } else if (note.tagList && note.tagList.length > 0) {
         // 否则使用笔记数据中的标签
         tags.value = note.tagList;
       } else {
         tags.value = [];
       }
-      
+
       // 更新标签颜色映射
       if (noteTags) {
-        noteTags.forEach(tag => {
+        noteTags.forEach((tag) => {
           if (tag.name && tag.color) {
             tagColorMap.value[tag.name] = tag.color;
           }
         });
       }
-      
+
       originalTags.value = [...tags.value];
       contentChanged.value = false;
       console.log("笔记数据加载成功，标题:", title.value, "标签:", tags.value);
@@ -274,11 +324,11 @@ watch(
   () => route.params.noteId,
   async (newId, oldId) => {
     console.log("URL参数变化，新ID:", newId, "旧ID:", oldId);
-    
+
     if (newId !== undefined && newId !== oldId) {
       noteId.value = String(newId);
       console.log("更新noteId.value为:", noteId.value, "类型:", typeof noteId.value);
-      
+
       // 使用同一个函数加载笔记数据，保持逻辑一致
       await loadNoteData(noteId.value);
     }
@@ -293,12 +343,12 @@ const saveNote = async () => {
   }
 
   // 过滤掉空标签
-  const filteredTags = tags.value.filter(tag => tag && tag.trim() !== '');
-  
+  const filteredTags = tags.value.filter((tag) => tag && tag.trim() !== "");
+
   loading.value = true;
   try {
-    let noteIdToUse: string = noteId.value || '';
-    
+    let noteIdToUse: string = noteId.value || "";
+
     // 步骤1: 保存笔记内容
     if (noteId.value) {
       // 更新现有笔记内容（不更新标签）
@@ -306,20 +356,20 @@ const saveNote = async () => {
         noteId.value,
         title.value,
         content.value,
-        []  // 不通过editNote更新标签，使用专门的标签API
+        [] // 不通过editNote更新标签，使用专门的标签API
       );
-      
+
       if (!contentResult) {
         throw new Error("笔记内容保存失败");
       }
     } else {
       // 创建新笔记
       const result = await notesStore.addNote(title.value, content.value, []);
-      
+
       if (!result) {
         throw new Error("创建笔记失败");
       }
-      
+
       // 获取新笔记ID
       if (typeof result === "string") {
         noteIdToUse = result;
@@ -330,19 +380,19 @@ const saveNote = async () => {
       } else {
         throw new Error("无法获取新笔记ID");
       }
-      
+
       // 更新URL和本地ID
       router.replace(`/notes/edit/${noteIdToUse}`);
       noteId.value = noteIdToUse;
     }
-    
+
     // 步骤2: 更新标签关联
     if (filteredTags.length > 0 || originalTags.value.length > 0) {
       console.log("开始更新标签关联");
       try {
         // 确保在更新标签前先获取最新的标签列表
         await fetchAllTags();
-        
+
         const oldTags = [...originalTags.value];
         const tagsResult = await notesStore.updateNoteTags(
           noteIdToUse,
@@ -350,7 +400,7 @@ const saveNote = async () => {
           oldTags,
           tagColorMap.value // 传递标签颜色映射
         );
-        
+
         if (tagsResult) {
           // 更新原始标签列表
           originalTags.value = [...filteredTags];
@@ -365,7 +415,7 @@ const saveNote = async () => {
         Message.warning("笔记已保存，但标签更新失败");
       }
     }
-    
+
     // 尝试刷新笔记列表中的数据
     await notesStore.fetchNotes();
     Message.success("笔记已保存");
@@ -391,9 +441,9 @@ const fetchAllTags = async () => {
     // 缓存所有标签
     allTagsCache.value = allTags;
     // 建立标签名称到颜色的映射
-    allTags.forEach(tag => {
+    allTags.forEach((tag) => {
       if (tag.name) {
-        tagColorMap.value[tag.name] = tag.color || '#165DFF';
+        tagColorMap.value[tag.name] = tag.color || "#165DFF";
       }
     });
     console.log("标签颜色映射:", tagColorMap.value);
@@ -410,12 +460,13 @@ const handleTagInputChange = () => {
     suggestedTags.value = [];
     return;
   }
-  
+
   // 从本地缓存中过滤标签，不发送网络请求
-  suggestedTags.value = allTagsCache.value.filter(tag => 
-    tag.name && 
-    tag.name.toLowerCase().includes(tagInput.value.toLowerCase()) &&
-    !tags.value.includes(tag.name)
+  suggestedTags.value = allTagsCache.value.filter(
+    (tag) =>
+      tag.name &&
+      tag.name.toLowerCase().includes(tagInput.value.toLowerCase()) &&
+      !tags.value.includes(tag.name)
   );
 };
 
@@ -426,43 +477,42 @@ watch(tagInput, handleTagInputChange);
 const handleTagInputConfirm = async () => {
   const inputValue = tagInput.value.trim();
   if (!inputValue) return;
-  
+
   try {
     loading.value = true;
-    
+
     // 先检查输入的标签是否已经包含在当前笔记的标签中
     if (tags.value.includes(inputValue)) {
       Message.warning(`标签"${inputValue}"已添加`);
-      tagInput.value = '';
+      tagInput.value = "";
       return;
     }
-    
+
     // 使用tagsController查询标签是否存在
     const allTags = await notesStore.getAllTags();
-    const existingTag = allTags.find(tag => 
-      tag.name && tag.name.toLowerCase() === inputValue.toLowerCase()
+    const existingTag = allTags.find(
+      (tag) => tag.name && tag.name.toLowerCase() === inputValue.toLowerCase()
     );
-    
+
     // 无论标签是否存在，先添加到UI
     tags.value.push(inputValue);
-    
+
     // 如果标签已存在，更新颜色映射
     if (existingTag && existingTag.color) {
       tagColorMap.value[inputValue] = existingTag.color;
     } else {
       // 新标签使用默认颜色
-      tagColorMap.value[inputValue] = '#165DFF';
+      tagColorMap.value[inputValue] = "#165DFF";
     }
-    
+
     // 标签只在UI中显示，不立即添加到笔记
     console.log(`标签"${inputValue}"已添加到UI，等待应用`);
-    
   } catch (error) {
     console.error("检查标签出错", error);
     Message.error("检查标签失败");
   } finally {
     loading.value = false;
-    tagInput.value = '';
+    tagInput.value = "";
     suggestedTags.value = [];
   }
 };
@@ -473,40 +523,40 @@ const selectSuggestion = (suggestion: any) => {
     // 添加到UI
     tags.value.push(suggestion.name);
     // 更新颜色映射
-    const tagColor = suggestion.color || '#165DFF';
+    const tagColor = suggestion.color || "#165DFF";
     tagColorMap.value[suggestion.name] = tagColor;
-    
+
     // 如果已有笔记ID，则立即绑定标签，传递标签颜色
     if (noteId.value) {
       addTagToExistingNote(suggestion.name, tagColor);
     }
   }
-  tagInput.value = '';
+  tagInput.value = "";
   suggestedTags.value = [];
 };
 
 // 添加标签到现有笔记
 const addTagToExistingNote = async (tagName: string, color?: string) => {
   if (!noteId.value || !tagName) return;
-  
+
   try {
     // 显示添加中的加载状态
     loading.value = true;
-    
+
     // 首先检查本地缓存中是否已存在该标签
-    const existingTag = allTagsCache.value.find(tag => 
-      tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
+    const existingTag = allTagsCache.value.find(
+      (tag) => tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
     );
-    
+
     let result = false;
-    
+
     if (existingTag && existingTag.id) {
       // 标签已存在，直接调用绑定API
       console.log(`标签"${tagName}"已存在，ID:${existingTag.id}，直接绑定到笔记`);
       try {
         const bindResult = await addTagToNoteUsingPost({
           noteId: noteId.value,
-          tagId: existingTag.id
+          tagId: existingTag.id,
         });
         result = bindResult.data.code === 0;
       } catch (bindError) {
@@ -520,13 +570,13 @@ const addTagToExistingNote = async (tagName: string, color?: string) => {
       // 尝试使用store方法，它会先检查是否存在，如果不存在则创建
       console.log(`标签"${tagName}"在本地缓存中不存在，使用store方法添加`);
       result = await notesStore.addTagToNote(noteId.value, tagName, color);
-      
+
       // 添加成功后刷新本地缓存，确保下次能找到这个标签
       if (result) {
         await fetchAllTags();
       }
     }
-    
+
     if (result) {
       // 更新原始标签列表，用于比较变更
       if (!originalTags.value.includes(tagName)) {
@@ -543,7 +593,7 @@ const addTagToExistingNote = async (tagName: string, color?: string) => {
   } catch (error) {
     console.error("标签添加失败", error);
     Message.error("标签添加失败");
-    
+
     // 从UI中移除标签
     const index = tags.value.indexOf(tagName);
     if (index !== -1) {
@@ -559,13 +609,13 @@ const removeTag = async (tag: string) => {
   const index = tags.value.indexOf(tag);
   if (index !== -1) {
     tags.value.splice(index, 1);
-    
+
     // 如果已有笔记ID，则立即从后端移除标签
     if (noteId.value) {
       try {
         loading.value = true;
         await notesStore.removeTagFromNote(noteId.value, tag);
-        
+
         // 更新原始标签列表
         const origIndex = originalTags.value.indexOf(tag);
         if (origIndex !== -1) {
@@ -586,8 +636,8 @@ const removeTag = async (tag: string) => {
 
 // 获取标签样式
 const getTagStyle = (tagName: string) => {
-  return { 
-    backgroundColor: tagColorMap.value[tagName] || '#165DFF' 
+  return {
+    backgroundColor: tagColorMap.value[tagName] || "#165DFF",
   };
 };
 
@@ -611,51 +661,51 @@ const applyTags = async () => {
     tagsModalVisible.value = false;
     return;
   }
-  
+
   // 现有笔记模式
   contentChanged.value = true;
-  
+
   // 过滤掉空标签
-  const filteredTags = tags.value.filter(tag => tag && tag.trim() !== '');
-  
+  const filteredTags = tags.value.filter((tag) => tag && tag.trim() !== "");
+
   // 如果过滤后与原始数组长度不同，说明有空标签被移除
   if (filteredTags.length !== tags.value.length) {
-    console.log('已移除空标签');
+    console.log("已移除空标签");
     tags.value = filteredTags;
   }
-  
+
   try {
     loading.value = true;
-    
+
     // 找出需要添加和移除的标签
     const oldTags = [...originalTags.value];
-    const tagsToAdd = filteredTags.filter(tag => !oldTags.includes(tag));
-    const tagsToRemove = oldTags.filter(tag => !filteredTags.includes(tag));
-    
+    const tagsToAdd = filteredTags.filter((tag) => !oldTags.includes(tag));
+    const tagsToRemove = oldTags.filter((tag) => !filteredTags.includes(tag));
+
     console.log("标签变更情况", {
       tagsToAdd,
-      tagsToRemove
+      tagsToRemove,
     });
-    
+
     let success = true;
-    
+
     // 使用noteTagsController添加新标签
     for (const tagName of tagsToAdd) {
       try {
         // 首先查找标签是否存在(获取tagId)
         const allTags = await notesStore.getAllTags();
-        const existingTag = allTags.find(tag => 
-          tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
+        const existingTag = allTags.find(
+          (tag) => tag.name && tag.name.toLowerCase() === tagName.toLowerCase()
         );
-        
+
         if (existingTag && existingTag.id) {
           // 标签已存在，直接关联
           console.log(`关联已存在标签"${tagName}"`);
           const bindResult = await addTagToNoteUsingPost({
             noteId: noteId.value,
-            tagId: existingTag.id
+            tagId: existingTag.id,
           });
-          
+
           if (bindResult.data.code !== 0) {
             console.error(`关联标签"${tagName}"失败`, bindResult.data.message);
             success = false;
@@ -663,7 +713,11 @@ const applyTags = async () => {
         } else {
           // 标签不存在，先创建再关联
           console.log(`创建并关联新标签"${tagName}"`);
-          const result = await notesStore.addTagToNote(noteId.value, tagName, tagColorMap.value[tagName]);
+          const result = await notesStore.addTagToNote(
+            noteId.value,
+            tagName,
+            tagColorMap.value[tagName]
+          );
           if (!result) {
             success = false;
           }
@@ -673,7 +727,7 @@ const applyTags = async () => {
         success = false;
       }
     }
-    
+
     // 移除旧标签
     for (const tagName of tagsToRemove) {
       try {
@@ -686,7 +740,7 @@ const applyTags = async () => {
         success = false;
       }
     }
-    
+
     if (success) {
       // 更新原始标签列表，以便下次比较
       originalTags.value = [...filteredTags];
@@ -705,8 +759,8 @@ const applyTags = async () => {
 
 // 离开页面前询问是否保存
 const beforeRouteLeave = (
-  to: RouteLocationNormalized, 
-  from: RouteLocationNormalized, 
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
   next: Function
 ) => {
   if (contentChanged.value) {
@@ -794,7 +848,8 @@ const beforeRouteLeave = (
 }
 
 /* Style for the Tiptap editor content area */
-.tiptap-editor :deep(.ProseMirror) { /* Use :deep to target ProseMirror internals */
+.tiptap-editor :deep(.ProseMirror) {
+  /* Use :deep to target ProseMirror internals */
   height: 100%; /* Make editor fill container height */
   min-height: 300px; /* Ensure a minimum height */
   padding: 12px;
@@ -866,5 +921,74 @@ const beforeRouteLeave = (
 
 .tag-suggestion-item:hover {
   background-color: var(--color-fill-2);
+}
+
+/* Added pre and pre code styles here inside :deep() */
+.tiptap-editor :deep(pre) {
+  background: #1e1e1e; /* 深色背景 */
+  color: #fff; /* 白色文本 */
+  font-family: "JetBrainsMono", monospace;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.tiptap-editor :deep(pre code) {
+  color: inherit;
+  background: none;
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+/* 语法高亮样式 - lowlight 使用 highlight.js 的类名 */
+.tiptap-editor :deep(.hljs-comment),
+.tiptap-editor :deep(.hljs-quote) {
+  color: #616161;
+}
+
+.tiptap-editor :deep(.hljs-variable),
+.tiptap-editor :deep(.hljs-template-variable),
+.tiptap-editor :deep(.hljs-attribute),
+.tiptap-editor :deep(.hljs-tag),
+.tiptap-editor :deep(.hljs-name),
+.tiptap-editor :deep(.hljs-regexp),
+.tiptap-editor :deep(.hljs-link),
+.tiptap-editor :deep(.hljs-selector-id),
+.tiptap-editor :deep(.hljs-selector-class) {
+  color: #F98181;
+}
+
+.tiptap-editor :deep(.hljs-number),
+.tiptap-editor :deep(.hljs-meta),
+.tiptap-editor :deep(.hljs-built_in),
+.tiptap-editor :deep(.hljs-builtin-name),
+.tiptap-editor :deep(.hljs-literal),
+.tiptap-editor :deep(.hljs-type),
+.tiptap-editor :deep(.hljs-params) {
+  color: #FBBC88;
+}
+
+.tiptap-editor :deep(.hljs-string),
+.tiptap-editor :deep(.hljs-symbol),
+.tiptap-editor :deep(.hljs-bullet) {
+  color: #B9F18D;
+}
+
+.tiptap-editor :deep(.hljs-title),
+.tiptap-editor :deep(.hljs-section) {
+  color: #FAF594;
+}
+
+.tiptap-editor :deep(.hljs-keyword),
+.tiptap-editor :deep(.hljs-selector-tag) {
+  color: #70CFF8;
+}
+
+.tiptap-editor :deep(.hljs-emphasis) {
+  font-style: italic;
+}
+
+.tiptap-editor :deep(.hljs-strong) {
+  font-weight: 700;
 }
 </style>
