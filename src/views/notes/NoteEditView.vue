@@ -83,6 +83,14 @@
           >
             <template #icon><icon-h4 /></template>
           </a-button>
+          <!-- 列表 -->
+          <a-button
+            size="mini"
+            :type="editor.isActive('bulletList') ? 'primary' : 'text'"
+            @click="editor.chain().focus().toggleBulletList().run()"
+          >
+            <template #icon><icon-list /></template>
+          </a-button>
           <a-button
             size="mini"
             :type="editor.isActive('orderedList') ? 'primary' : 'text'"
@@ -91,6 +99,30 @@
             <template #icon><icon-list /></template>
             <!-- Reusing icon for ordered list -->
           </a-button>
+          <!-- 左、中、右对齐 -->
+          <a-button
+            size="mini"
+            :type="editor.isActive({ textAlign: 'left' }) ? 'primary' : 'text'"
+            @click="editor.chain().focus().setTextAlign('left').run()"
+          >
+            <template #icon><icon-align-left /></template>
+          </a-button>
+          <a-button
+            size="mini"
+            :type="editor.isActive({ textAlign: 'center' }) ? 'primary' : 'text'"
+            @click="editor.chain().focus().setTextAlign('center').run()"
+          >
+            <template #icon><icon-align-center /></template>
+          </a-button>
+          <a-button
+            size="mini"
+            :type="editor.isActive({ textAlign: 'right' }) ? 'primary' : 'text'"
+            @click="editor.chain().focus().setTextAlign('right').run()"
+          >
+            <template #icon><icon-align-right /></template>
+          </a-button>
+
+          <!-- 代码块 -->
           <a-button
             size="mini"
             :type="editor.isActive('codeBlock') ? 'primary' : 'text'"
@@ -165,7 +197,9 @@ import {
   IconH2,
   IconH3,
   IconH4,
-  IconH5,
+  IconAlignLeft,
+  IconAlignCenter,
+  IconAlignRight,
 } from "@arco-design/web-vue/es/icon";
 import { useNotesStore } from "@/store/notesStore";
 import { useLoginUserStore } from "@/store/userStore";
@@ -173,8 +207,9 @@ import { addTagToNoteUsingPost } from "@/api/noteTagsController";
 // Tiptap imports
 import { useEditor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
-import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
-import { common, createLowlight } from "lowlight";
+import Highlight from "@tiptap/extension-highlight";
+import Typography from "@tiptap/extension-typography";
+import TextAlign from "@tiptap/extension-text-align";
 
 const route = useRoute();
 const router = useRouter();
@@ -191,18 +226,19 @@ const content = ref("");
 const tags = ref<string[]>([]);
 // Tiptap editor instance
 const editor = useEditor({
-  content: content.value,
+  content: content.value, // Initialize with content
   extensions: [
-    StarterKit.configure({
-      codeBlock: false, // 禁用 StarterKit 内置的代码块
-    }),
-    CodeBlockLowlight.configure({
-      lowlight: createLowlight(common),
-      defaultLanguage: "plaintext", // 可选：设置默认语言
+    StarterKit,
+    Highlight,
+    Typography,
+    TextAlign.configure({
+      types: ["heading", "paragraph"],
     }),
   ],
   onUpdate: ({ editor }) => {
+    // Sync editor content back to the ref
     content.value = editor.getHTML();
+    // Trigger change detection
     onContentChange();
   },
 });
@@ -868,13 +904,11 @@ const beforeRouteLeave = (
   margin-bottom: 0.75em;
 }
 
-.tiptap-editor :deep(h1, h2, h3,h4) {
+.tiptap-editor :deep(h1, h2, h3, h4) {
   margin-top: 1em;
   margin-bottom: 0.5em;
   font-weight: bold;
 }
-
-
 
 .tiptap-editor :deep(ul, ol) {
   padding-left: 1.5em;
@@ -929,70 +963,28 @@ const beforeRouteLeave = (
 
 /* Added pre and pre code styles here inside :deep() */
 .tiptap-editor :deep(pre) {
-  background: #1e1e1e; /* 深色背景 */
-  color: #fff; /* 白色文本 */
+  background: #0d0d0d; /* 更深的黑色 */
+  color: #fff;
   font-family: "JetBrainsMono", monospace;
-  margin: 1.5rem 0;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
 }
 
 .tiptap-editor :deep(pre code) {
   color: inherit;
+  padding: 0;
   background: none;
   font-size: 0.8rem;
-  padding: 0;
 }
 
-/* 语法高亮样式 - lowlight 使用 highlight.js 的类名 */
+/* 添加语法高亮相关样式 (如果使用CodeBlockLowlight) */
 .tiptap-editor :deep(.hljs-comment),
 .tiptap-editor :deep(.hljs-quote) {
   color: #616161;
 }
 
 .tiptap-editor :deep(.hljs-variable),
-.tiptap-editor :deep(.hljs-template-variable),
-.tiptap-editor :deep(.hljs-attribute),
-.tiptap-editor :deep(.hljs-tag),
-.tiptap-editor :deep(.hljs-name),
-.tiptap-editor :deep(.hljs-regexp),
-.tiptap-editor :deep(.hljs-link),
-.tiptap-editor :deep(.hljs-selector-id),
-.tiptap-editor :deep(.hljs-selector-class) {
+.tiptap-editor :deep(.hljs-tag) {
   color: #f98181;
-}
-
-.tiptap-editor :deep(.hljs-number),
-.tiptap-editor :deep(.hljs-meta),
-.tiptap-editor :deep(.hljs-built_in),
-.tiptap-editor :deep(.hljs-builtin-name),
-.tiptap-editor :deep(.hljs-literal),
-.tiptap-editor :deep(.hljs-type),
-.tiptap-editor :deep(.hljs-params) {
-  color: #fbbc88;
-}
-
-.tiptap-editor :deep(.hljs-string),
-.tiptap-editor :deep(.hljs-symbol),
-.tiptap-editor :deep(.hljs-bullet) {
-  color: #b9f18d;
-}
-
-.tiptap-editor :deep(.hljs-title),
-.tiptap-editor :deep(.hljs-section) {
-  color: #faf594;
-}
-
-.tiptap-editor :deep(.hljs-keyword),
-.tiptap-editor :deep(.hljs-selector-tag) {
-  color: #70cff8;
-}
-
-.tiptap-editor :deep(.hljs-emphasis) {
-  font-style: italic;
-}
-
-.tiptap-editor :deep(.hljs-strong) {
-  font-weight: 700;
 }
 </style>
