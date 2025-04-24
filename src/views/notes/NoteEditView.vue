@@ -282,6 +282,69 @@ const editor = useEditor({
       // ... existing code ...
     }),
   ],
+  editorProps: {
+    handlePaste: function (view: any, event: ClipboardEvent, slice: any): boolean {
+      const items = Array.from(event.clipboardData?.items || []);
+      for (const item of items) {
+        if (item.type.indexOf("image") === 0) {
+          const file = item.getAsFile(); // Get the file object
+          if (!file) {
+            console.warn("Could not get file from DataTransferItem");
+            continue; // Skip if file couldn't be retrieved
+          }
+
+          const filesizeMB = file.size / 1024 / 1024; // Calculate size in MB
+
+          if (filesizeMB < 10) {
+            // check image under 10MB (compare numbers)
+            // check the dimensions
+            const _URL = window.URL || window.webkitURL;
+            const img = new window.Image(); // Use window.Image to avoid conflict
+            img.src = _URL.createObjectURL(file); // Use the file object
+            img.onload = function () {
+              _URL.revokeObjectURL(img.src); // Clean up object URL
+              if (img.width > 5000 || img.height > 5000) {
+                // Use img.width/height after load
+                console.log("图片不能超过5000px");
+                //window.alert("Your images need to be less than 5000 pixels in height and width."); // display alert
+              } else {
+                // Valid image - use the existing upload function
+                console.log("Pasted image seems valid, attempting upload...");
+                uploadImageAndInsert(file); // Call your existing upload function
+                // The original example's node creation/transaction logic is replaced by uploadImageAndInsert
+              }
+            };
+            img.onerror = function () {
+              _URL.revokeObjectURL(img.src); // Clean up also on error
+              console.error("Could not load pasted image for dimension check.");
+            };
+          } else {
+            console.log("图片不能超过10mb");
+            //window.alert("Images need to be less than 10mb in size.");
+          }
+          return true; // handled
+        }
+      }
+
+      // If no image was handled, explicitly call the previous (or intended) paste logic for text/url?
+      // For now, just returning false as per the original pasted example
+      return false; // not handled use default behaviour
+    },
+    transformPastedHTML(html: string): string {
+      // Added types for html and return type
+      // !!! Replace with your actual image hosting URL pattern !!!
+      const yourImageHostingPattern = /^https?:\/\/your-image-hosting\.com\//;
+
+      return html.replace(/<img.*?src="(?<imgSrc>.*?)".*?>/g, (match, imgSrc) => {
+        if (imgSrc && yourImageHostingPattern.test(imgSrc)) {
+          console.log("Keeping image from known host:", imgSrc);
+          return match; // keep the img if src matches your pattern
+        }
+        console.log("Removing image from unknown source:", imgSrc);
+        return ""; // replace img tags from other sources
+      });
+    },
+  },
   onUpdate: ({ editor }) => {
     // Sync editor content back to the ref
     content.value = editor.getHTML();
@@ -326,46 +389,46 @@ const allTagsCache = ref<any[]>([]);
  */
 const getApiBaseUrl = () => {
   // 检测当前环境
-  const isLocalhost = window.location.hostname === 'localhost' || 
-                     window.location.hostname === '127.0.0.1';
-  
+  const isLocalhost =
+    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
   // 在生产环境中，这通常是你的应用域名
-  const productionBaseUrl = 'https://zhihainote.top/api'; 
-  
+  const productionBaseUrl = "https://zhihainote.top/api";
+
   // 开发环境URL
-  const devBaseUrl = 'http://localhost:8010/api';
-  
+  const devBaseUrl = "http://localhost:8010/api";
+
   // 根据当前环境返回适当的URL
   return isLocalhost ? devBaseUrl : productionBaseUrl;
 };
 
 /**
  * 处理后端返回的图片URL，确保安全访问
- * 
+ *
  * 注意：后端现在返回相对URL或文件名，前端需要根据当前环境构建完整URL
- * 
+ *
  * @param {string} relativeUrl - 后端返回的相对图片URL或文件名
  * @returns {string} 完整的可访问图片URL
  */
 const processImageUrl = (relativeUrl: string): string => {
-  if (!relativeUrl) return '';
-  
+  if (!relativeUrl) return "";
+
   // 如果已经是绝对URL (以http或https开头)，直接返回
-  if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
+  if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
     return relativeUrl;
   }
-  
+
   // 确保URL没有双斜杠等安全隐患
-  let processedUrl = relativeUrl.replace(/\/\//g, '/');
-  
+  let processedUrl = relativeUrl.replace(/\/\//g, "/");
+
   // 如果是纯文件名，添加 /images/ 前缀
-  if (!processedUrl.startsWith('/')) {
-    processedUrl = '/images/' + processedUrl;
+  if (!processedUrl.startsWith("/")) {
+    processedUrl = "/images/" + processedUrl;
   }
-  
+
   // 获取当前环境的基础URL
   const apiBaseUrl = getApiBaseUrl();
-  
+
   // 拼接完整URL
   return apiBaseUrl + processedUrl;
 };
@@ -376,43 +439,39 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 // Upload helper function
 const uploadImageAndInsert = async (file: File) => {
   if (!editor.value) return;
-  if (!file.type.startsWith('image/')) {
-      Message.error('请选择图片文件');
-      return;
+  if (!file.type.startsWith("image/")) {
+    Message.error("请选择图片文件");
+    return;
   }
 
   loading.value = true;
   try {
-    const res = await uploadFileUsingPost(
-      { biz: 'note_image' },
-      {},
-      file
-    );
+    const res = await uploadFileUsingPost({ biz: "note_image" }, {}, file);
 
     // 使用类型断言解决TypeScript的类型推断问题
-    const responseData = res.data as { 
-      code: number; 
-      data: string; 
-      message: string 
+    const responseData = res.data as {
+      code: number;
+      data: string;
+      message: string;
     };
 
     if (responseData && responseData.code === 0 && responseData.data) {
       // 处理后端返回的相对URL或文件名，转换为完整URL
       const relativePath = responseData.data;
       const fullImageUrl = processImageUrl(relativePath);
-      
-      console.log('后端返回的相对路径:', relativePath);
-      console.log('处理后的完整URL:', fullImageUrl);
-      
+
+      console.log("后端返回的相对路径:", relativePath);
+      console.log("处理后的完整URL:", fullImageUrl);
+
       // 使用完整URL设置图片
       editor.value.chain().focus().setImage({ src: fullImageUrl }).run();
-      Message.success('图片上传成功');
+      Message.success("图片上传成功");
     } else {
-      Message.error(responseData?.message || '图片上传失败');
+      Message.error(responseData?.message || "图片上传失败");
     }
   } catch (error) {
-    console.error('图片上传失败:', error);
-    Message.error('图片上传失败');
+    console.error("图片上传失败:", error);
+    Message.error("图片上传失败");
   } finally {
     loading.value = false;
   }
@@ -436,36 +495,21 @@ const handleFileSelect = (event: Event) => {
 };
 // === End Image Upload Logic ===
 
-// === Paste Handling Logic ===
+// === 处理粘贴网络路径图片逻辑===
 const handlePaste = (view: any, event: ClipboardEvent): boolean => {
   if (!editor.value) return false;
 
   const clipboardData = event.clipboardData;
   if (!clipboardData) return false;
 
-  // Check for files
-  const files = clipboardData.files;
-  if (files && files.length > 0) {
-    let imagePasted = false;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.type.startsWith('image/')) {
-        event.preventDefault();
-        uploadImageAndInsert(file);
-        imagePasted = true;
-      }
-    }
-    if (imagePasted) return true;
-  }
-
-  // Check for image URL
-  const text = clipboardData.getData('text/plain');
+  // 处理网络图片的url
+  const text = clipboardData.getData("text/plain");
   const urlRegex = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp|webp))$/i;
   if (text && urlRegex.test(text)) {
-      event.preventDefault();
-      // 对于粘贴的URL，不需要处理，因为它已经是完整URL
-      editor.value.chain().focus().setImage({ src: text }).run();
-      return true;
+    event.preventDefault();
+    // 对于粘贴的URL，不需要处理，因为它已经是完整URL
+    editor.value.chain().focus().setImage({ src: text }).run();
+    return true;
   }
 
   return false;
@@ -1158,6 +1202,21 @@ const beforeRouteLeave = (
 
 .tag-suggestion-item:hover {
   background-color: var(--color-fill-2);
+}
+
+/* Optional: Add some styling for the image node if needed */
+.tiptap-editor :deep(img.ProseMirror-selectednode) {
+  outline: 3px solid #f0f4f6;
+}
+
+/* === 控制图片大小 === */
+.tiptap-editor :deep(img) {
+  /* Target all images within the editor */
+  width: 25% !important; /* 恢复宽度控制 */
+  height: auto !important; /* 高度自动保持比例 */
+  display: block; /* Optional: ensure images are block-level for consistent layout */
+  margin-left: auto; /* Optional: Center the image if container is wider */
+  margin-right: auto; /* Optional: Center the image if container is wider */
 }
 
 /* Added pre and pre code styles here inside :deep() */
