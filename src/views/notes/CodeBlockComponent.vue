@@ -43,6 +43,11 @@ const updateLanguage = (event: Event) => {
 };
 </script>
 
+<!-- Add an empty script block to satisfy default export requirement for some bundlers/linters -->
+<script lang="ts">
+export default {};
+</script>
+
 <style scoped>
 .code-block {
   position: relative;

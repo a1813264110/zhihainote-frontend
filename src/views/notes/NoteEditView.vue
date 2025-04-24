@@ -130,6 +130,18 @@
           >
             <template #icon><icon-code-block /></template>
           </a-button>
+          <!-- 图片粘贴处 -->
+          <a-button size="mini" type="text" @click="triggerImageUpload">
+            <template #icon><icon-image /></template>
+          </a-button>
+          <!-- Hidden file input -->
+          <input
+            type="file"
+            ref="fileInputRef"
+            accept="image/*"
+            style="display: none"
+            @change="handleFileSelect"
+          />
         </a-space>
       </div>
       <!-- Tiptap Editor Content Area -->
@@ -200,6 +212,7 @@ import {
   IconAlignLeft,
   IconAlignCenter,
   IconAlignRight,
+  IconImage,
 } from "@arco-design/web-vue/es/icon";
 import { useNotesStore } from "@/store/notesStore";
 import { useLoginUserStore } from "@/store/userStore";
@@ -210,7 +223,8 @@ import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import TextAlign from "@tiptap/extension-text-align";
-
+import Image from "@tiptap/extension-image";
+import { uploadFileUsingPost } from "@/api/fileController";
 // === Syntax Highlighting Imports ===
 import { all, createLowlight } from "lowlight";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -259,10 +273,14 @@ const editor = useEditor({
     // === Syntax Highlighting Extension ===
     CodeBlockLowlight.extend({
       addNodeView() {
+        // @ts-ignore <-- Add ts-ignore to suppress type error
         return VueNodeViewRenderer(CodeBlockComponent);
       },
     }).configure({ lowlight }),
     // === End Syntax Highlighting Extension ===
+    Image.configure({
+      // ... existing code ...
+    }),
   ],
   onUpdate: ({ editor }) => {
     // Sync editor content back to the ref
@@ -301,6 +319,158 @@ const loading = ref(false);
 const originalTags = ref<string[]>([]);
 // 本地缓存的所有标签列表
 const allTagsCache = ref<any[]>([]);
+
+/**
+ * 获取当前环境的API基础URL
+ * 在实际项目中，这应该从配置中读取
+ */
+const getApiBaseUrl = () => {
+  // 检测当前环境
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1';
+  
+  // 在生产环境中，这通常是你的应用域名
+  const productionBaseUrl = 'https://zhihainote.top/api'; 
+  
+  // 开发环境URL
+  const devBaseUrl = 'http://localhost:8010/api';
+  
+  // 根据当前环境返回适当的URL
+  return isLocalhost ? devBaseUrl : productionBaseUrl;
+};
+
+/**
+ * 处理后端返回的图片URL，确保安全访问
+ * 
+ * 注意：后端现在返回相对URL或文件名，前端需要根据当前环境构建完整URL
+ * 
+ * @param {string} relativeUrl - 后端返回的相对图片URL或文件名
+ * @returns {string} 完整的可访问图片URL
+ */
+const processImageUrl = (relativeUrl: string): string => {
+  if (!relativeUrl) return '';
+  
+  // 如果已经是绝对URL (以http或https开头)，直接返回
+  if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
+    return relativeUrl;
+  }
+  
+  // 确保URL没有双斜杠等安全隐患
+  let processedUrl = relativeUrl.replace(/\/\//g, '/');
+  
+  // 如果是纯文件名，添加 /images/ 前缀
+  if (!processedUrl.startsWith('/')) {
+    processedUrl = '/images/' + processedUrl;
+  }
+  
+  // 获取当前环境的基础URL
+  const apiBaseUrl = getApiBaseUrl();
+  
+  // 拼接完整URL
+  return apiBaseUrl + processedUrl;
+};
+
+// === Image Upload Logic ===
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
+// Upload helper function
+const uploadImageAndInsert = async (file: File) => {
+  if (!editor.value) return;
+  if (!file.type.startsWith('image/')) {
+      Message.error('请选择图片文件');
+      return;
+  }
+
+  loading.value = true;
+  try {
+    const res = await uploadFileUsingPost(
+      { biz: 'note_image' },
+      {},
+      file
+    );
+
+    // 使用类型断言解决TypeScript的类型推断问题
+    const responseData = res.data as { 
+      code: number; 
+      data: string; 
+      message: string 
+    };
+
+    if (responseData && responseData.code === 0 && responseData.data) {
+      // 处理后端返回的相对URL或文件名，转换为完整URL
+      const relativePath = responseData.data;
+      const fullImageUrl = processImageUrl(relativePath);
+      
+      console.log('后端返回的相对路径:', relativePath);
+      console.log('处理后的完整URL:', fullImageUrl);
+      
+      // 使用完整URL设置图片
+      editor.value.chain().focus().setImage({ src: fullImageUrl }).run();
+      Message.success('图片上传成功');
+    } else {
+      Message.error(responseData?.message || '图片上传失败');
+    }
+  } catch (error) {
+    console.error('图片上传失败:', error);
+    Message.error('图片上传失败');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Image button click handler
+const triggerImageUpload = () => {
+  console.log("Triggering image upload..."); // Add console log
+  fileInputRef.value?.click();
+};
+
+// File selection handler
+const handleFileSelect = (event: Event) => {
+  console.log("Handling file select..."); // Add console log
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    uploadImageAndInsert(file);
+    input.value = "";
+  }
+};
+// === End Image Upload Logic ===
+
+// === Paste Handling Logic ===
+const handlePaste = (view: any, event: ClipboardEvent): boolean => {
+  if (!editor.value) return false;
+
+  const clipboardData = event.clipboardData;
+  if (!clipboardData) return false;
+
+  // Check for files
+  const files = clipboardData.files;
+  if (files && files.length > 0) {
+    let imagePasted = false;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.type.startsWith('image/')) {
+        event.preventDefault();
+        uploadImageAndInsert(file);
+        imagePasted = true;
+      }
+    }
+    if (imagePasted) return true;
+  }
+
+  // Check for image URL
+  const text = clipboardData.getData('text/plain');
+  const urlRegex = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp|webp))$/i;
+  if (text && urlRegex.test(text)) {
+      event.preventDefault();
+      // 对于粘贴的URL，不需要处理，因为它已经是完整URL
+      editor.value.chain().focus().setImage({ src: text }).run();
+      return true;
+  }
+
+  return false;
+};
+// === End Paste Handling ===
 
 // 当用户访问时检查登录状态
 onMounted(async () => {

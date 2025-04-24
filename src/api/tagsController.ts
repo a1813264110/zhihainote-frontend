@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request  from "@/request";
+import  request  from "../request";
 
 /** addTags POST /api/tags/add */
 export async function addTagsUsingPost(body: API.TagsAddRequest, options?: { [key: string]: any }) {

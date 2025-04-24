@@ -703,6 +703,10 @@ declare namespace API {
     variables?: Record<string, any>;
   };
 
+  type uploadFileUsingPOSTParams = {
+    biz?: string;
+  };
+
   type User = {
     createTime?: string;
     id?: string;

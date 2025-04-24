@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request  from "@/request";
+import  request  from "../request";
 
 /** getUserSettings GET /api/settings */
 export async function getUserSettingsUsingGet(options?: { [key: string]: any }) {

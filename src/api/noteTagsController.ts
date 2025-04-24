@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request  from "@/request";
+import  request  from "../request";
 
 /** addTagToNote POST /api/note/tags/add */
 export async function addTagToNoteUsingPost(

@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import request  from "@/request";
+import  request  from "../request";
 
 /** cleanupOldVersions POST /api/versions/cleanup */
 export async function cleanupOldVersionsUsingPost(

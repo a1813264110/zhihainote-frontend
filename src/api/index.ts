@@ -4,6 +4,7 @@
 // API 唯一标识：
 import * as apiDocController from "./apiDocController";
 import * as backupsController from "./backupsController";
+import * as fileController from "./fileController";
 import * as noteTagsController from "./noteTagsController";
 import * as notesController from "./notesController";
 import * as settingsController from "./settingsController";
@@ -14,6 +15,7 @@ import * as noteVersionsController from "./noteVersionsController";
 export default {
   apiDocController,
   backupsController,
+  fileController,
   noteTagsController,
   notesController,
   settingsController,
